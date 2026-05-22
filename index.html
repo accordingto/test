@@ -1,1 +1,313 @@
-hello test
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>測試頁面</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #1a1a2e;
+      border-bottom: 2px solid #e8eaf0;
+      padding-bottom: 10px;
+    }
+
+    /* Button test */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #4361ee; color: #fff; }
+    .btn-success { background: #2ecc71; color: #fff; }
+    .btn-danger  { background: #e74c3c; color: #fff; }
+    .btn-outline { background: transparent; color: #4361ee; border: 2px solid #4361ee; }
+
+    /* Form test */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #4361ee;
+    }
+
+    /* Status badges */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-info    { background: #dbeafe; color: #1d4ed8; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+    .badge-error   { background: #fee2e2; color: #991b1b; }
+
+    /* Counter */
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .counter span {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4361ee;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    /* Progress */
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #e8eaf0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .fill-blue   { background: #4361ee; width: 72%; }
+    .fill-green  { background: #2ecc71; width: 45%; }
+    .fill-orange { background: #f39c12; width: 88%; }
+
+    /* Toast */
+    #toast-area {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 999;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(60px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    .toast-success { background: #2ecc71; }
+    .toast-error   { background: #e74c3c; }
+    .toast-info    { background: #4361ee; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>測試頁面</h1>
+    <p>UI 元件與互動功能展示</p>
+  </header>
+
+  <div class="card-grid">
+
+    <!-- Buttons -->
+    <div class="card">
+      <h2>按鈕</h2>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showToast('已點擊主要按鈕', 'info')">主要</button>
+        <button class="btn btn-success" onclick="showToast('操作成功！', 'success')">成功</button>
+        <button class="btn btn-danger"  onclick="showToast('操作失敗！', 'error')">危險</button>
+        <button class="btn btn-outline" onclick="showToast('外框按鈕', 'info')">外框</button>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="card">
+      <h2>表單</h2>
+      <div class="form-group">
+        <label>姓名</label>
+        <input type="text" placeholder="請輸入姓名">
+      </div>
+      <div class="form-group">
+        <label>類別</label>
+        <select>
+          <option>選項 A</option>
+          <option>選項 B</option>
+          <option>選項 C</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="showToast('表單已提交', 'success')">送出</button>
+    </div>
+
+    <!-- Badges -->
+    <div class="card">
+      <h2>狀態標籤</h2>
+      <div class="badge-row">
+        <span class="badge badge-info">資訊</span>
+        <span class="badge badge-success">成功</span>
+        <span class="badge badge-warning">警告</span>
+        <span class="badge badge-error">錯誤</span>
+      </div>
+    </div>
+
+    <!-- Counter -->
+    <div class="card">
+      <h2>計數器</h2>
+      <div class="counter">
+        <button class="btn btn-outline" onclick="changeCount(-1)">−</button>
+        <span id="count">0</span>
+        <button class="btn btn-primary" onclick="changeCount(1)">+</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="card">
+      <h2>進度條</h2>
+      <div class="progress-label"><span>任務進度</span><span>72%</span></div>
+      <div class="progress-bar"><div class="progress-fill fill-blue"></div></div>
+
+      <div class="progress-label"><span>上傳進度</span><span>45%</span></div>
+      <div class="progress-bar"><div class="progress-fill fill-green"></div></div>
+
+      <div class="progress-label"><span>系統負載</span><span>88%</span></div>
+      <div class="progress-bar"><div class="progress-fill fill-orange"></div></div>
+    </div>
+
+    <!-- Toast trigger -->
+    <div class="card">
+      <h2>通知訊息</h2>
+      <div class="btn-row">
+        <button class="btn btn-success" onclick="showToast('操作成功完成！', 'success')">成功通知</button>
+        <button class="btn btn-danger"  onclick="showToast('發生錯誤，請重試。', 'error')">錯誤通知</button>
+        <button class="btn btn-primary" onclick="showToast('這是一則資訊通知。', 'info')">資訊通知</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast-area"></div>
+
+  <script>
+    let count = 0;
+
+    function changeCount(delta) {
+      count += delta;
+      document.getElementById('count').textContent = count;
+    }
+
+    function showToast(message, type) {
+      const area = document.getElementById('toast-area');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      area.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+
+</body>
+</html>
