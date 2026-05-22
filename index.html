@@ -203,6 +203,66 @@
     .toast-success { background: #2ecc71; }
     .toast-error   { background: #e74c3c; }
     .toast-info    { background: #4361ee; }
+
+    /* Calculator */
+    .calc-card {
+      grid-column: 1 / -1;
+      max-width: 320px;
+      justify-self: center;
+      width: 100%;
+    }
+
+    .calc-display {
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: right;
+    }
+
+    .calc-expr {
+      color: #888;
+      font-size: 0.85rem;
+      min-height: 1.2em;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .calc-result {
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .calc-btn {
+      padding: 16px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .calc-btn:hover  { opacity: 0.85; }
+    .calc-btn:active { transform: scale(0.94); }
+
+    .calc-btn-num  { background: #e8eaf0; color: #1a1a2e; }
+    .calc-btn-op   { background: #4361ee; color: #fff; }
+    .calc-btn-eq   { background: #2ecc71; color: #fff; }
+    .calc-btn-fn   { background: #c5cae9; color: #1a1a2e; }
+    .calc-btn-zero { grid-column: span 2; }
   </style>
 </head>
 <body>
@@ -287,6 +347,40 @@
       </div>
     </div>
 
+    <!-- Calculator -->
+    <div class="card calc-card">
+      <h2>計算機</h2>
+      <div class="calc-display">
+        <div class="calc-expr" id="calc-expr"></div>
+        <div class="calc-result" id="calc-result">0</div>
+      </div>
+      <div class="calc-buttons">
+        <button class="calc-btn calc-btn-fn" onclick="calcFn('clear')">C</button>
+        <button class="calc-btn calc-btn-fn" onclick="calcFn('sign')">+/-</button>
+        <button class="calc-btn calc-btn-fn" onclick="calcFn('percent')">%</button>
+        <button class="calc-btn calc-btn-op" onclick="calcOp('/')">÷</button>
+
+        <button class="calc-btn calc-btn-num" onclick="calcNum('7')">7</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('8')">8</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('9')">9</button>
+        <button class="calc-btn calc-btn-op" onclick="calcOp('*')">×</button>
+
+        <button class="calc-btn calc-btn-num" onclick="calcNum('4')">4</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('5')">5</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('6')">6</button>
+        <button class="calc-btn calc-btn-op" onclick="calcOp('-')">−</button>
+
+        <button class="calc-btn calc-btn-num" onclick="calcNum('1')">1</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('2')">2</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('3')">3</button>
+        <button class="calc-btn calc-btn-op" onclick="calcOp('+')">+</button>
+
+        <button class="calc-btn calc-btn-num calc-btn-zero" onclick="calcNum('0')">0</button>
+        <button class="calc-btn calc-btn-num" onclick="calcNum('.')">.</button>
+        <button class="calc-btn calc-btn-eq" onclick="calcFn('eq')">=</button>
+      </div>
+    </div>
+
   </div>
 
   <div id="toast-area"></div>
@@ -306,6 +400,56 @@
       toast.textContent = message;
       area.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Calculator
+    const calcState = { current: '0', prev: null, op: null, fresh: true };
+
+    function calcRender() {
+      const exprMap = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+      const expr = calcState.prev !== null && calcState.op
+        ? `${calcState.prev} ${exprMap[calcState.op]}`
+        : '';
+      document.getElementById('calc-expr').textContent = expr;
+      document.getElementById('calc-result').textContent = calcState.current;
+    }
+
+    function calcNum(d) {
+      if (calcState.fresh) { calcState.current = ''; calcState.fresh = false; }
+      if (d === '.' && calcState.current.includes('.')) return;
+      if (calcState.current === '0' && d !== '.') { calcState.current = d; }
+      else { calcState.current += d; }
+      calcRender();
+    }
+
+    function calcOp(op) {
+      if (calcState.prev !== null && calcState.op && !calcState.fresh) {
+        calcFn('eq', true);
+      }
+      calcState.prev = parseFloat(calcState.current);
+      calcState.op = op;
+      calcState.fresh = true;
+      calcRender();
+    }
+
+    function calcFn(fn, internal) {
+      const cur = parseFloat(calcState.current);
+      if (fn === 'clear') {
+        Object.assign(calcState, { current: '0', prev: null, op: null, fresh: true });
+      } else if (fn === 'sign') {
+        calcState.current = String(-cur);
+      } else if (fn === 'percent') {
+        calcState.current = String(cur / 100);
+      } else if (fn === 'eq') {
+        if (calcState.op === null || calcState.prev === null) return;
+        const ops = { '+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => b === 0 ? 'Error' : a / b };
+        const res = ops[calcState.op](calcState.prev, cur);
+        calcState.current = typeof res === 'number' ? String(parseFloat(res.toPrecision(12))) : res;
+        calcState.prev = null;
+        calcState.op = null;
+        calcState.fresh = true;
+      }
+      if (!internal) calcRender();
     }
   </script>
 
