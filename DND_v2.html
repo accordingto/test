@@ -81,11 +81,6 @@
     .diff-normal { background: rgba(212,168,67,.18); color: var(--gold); }
     .diff-hard   { background: rgba(192,57,43,.18);  color: #e74c3c; }
     .path-desc { font-size: .75rem; color: var(--muted); line-height: 1.5; }
-    .path-percent-badge { position: absolute; top: 8px; right: 8px; background: rgba(142,68,173,.9); color: #fff; font-size: .9rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; display: none; }
-    .path-card.revealed .path-percent-badge { display: block; }
-    .oracle-badge { position: absolute; top: 8px; left: 8px; font-size: .8rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; display: none; }
-    .oracle-ok  { background: rgba(39,174,96,.9);  color: #fff; }
-    .oracle-bad { background: rgba(192,57,43,.9);  color: #fff; }
 
     /* Challenge Section */
     #challenge-section { max-height: 0; overflow: hidden; transition: max-height .5s ease; width: 100%; max-width: 600px; }
@@ -163,12 +158,6 @@
     #skill-name-zh { font-size: 1.2rem; color: rgba(255,255,255,.8); margin-top: 8px; }
     #skill-effect { font-size: .88rem; color: rgba(255,255,255,.6); margin-top: 12px; font-style: italic; max-width: 320px; line-height: 1.5; }
 
-    /* ── ORACLE PEEK ── */
-    #oracle-overlay { position: fixed; inset: 0; z-index: 160; background: rgba(0,0,0,.9); display: none; align-items: center; justify-content: center; padding: 20px; }
-    #oracle-card { background: var(--card); border: 2px solid #8e44ad; border-radius: 18px; padding: 28px 22px; max-width: 400px; width: 100%; text-align: center; animation: slideUp .35s ease; }
-    @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
-    #oracle-result-icon { font-size: 3rem; margin: 12px 0; }
-    #oracle-result-text { font-size: 1.05rem; font-weight: 600; line-height: 1.6; margin-bottom: 20px; }
 
     /* ── END SCREENS ── */
     .end-screen { position: fixed; inset: 0; background: rgba(0,0,0,.93); flex-direction: column; align-items: center; justify-content: center; z-index: 100; display: none; padding: 20px; text-align: center; }
@@ -248,12 +237,14 @@
       </div>
     </div>
     <div id="dice-section">
+      <div id="active-skills" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;min-height:24px"></div>
       <div class="dice-row" id="dice-row"></div>
       <button class="action-btn btn-gold" onclick="rollDice()">🎲 骰骰子！</button>
     </div>
     <div id="result-section">
       <div class="result-icon" id="res-icon"></div>
       <div class="result-text" id="res-text"></div>
+      <button id="reroll-btn" class="action-btn btn-gold" onclick="doMageReroll()" style="display:none;margin-bottom:12px">🔮 守護魔法——重新擲骰！</button>
       <button class="action-btn btn-green" onclick="nextLevel()" id="next-btn">繼續冒險 ▶</button>
     </div>
   </div>
@@ -276,7 +267,8 @@
         </div>
       </div>
       <div class="h-section">
-        <h3>✨ 技能發動</h3>
+        <h3>✨ 技能發動（每人限用一次）</h3>
+        <div style="font-size:.68rem;color:var(--muted);margin-bottom:8px;line-height:1.6">⚔️ 雙骰衝鋒：擲骰前用，骰2取高<br>🧙 守護魔法：擲骰前用，失敗可重擲<br>👁 命運扭曲：選路前用，門檻全 -1</div>
         <div id="skill-rows"></div>
       </div>
       <div class="h-section full">
@@ -309,17 +301,6 @@
   </div>
 </div>
 
-<!-- ══ ORACLE OVERLAY ══ -->
-<div id="oracle-overlay">
-  <div id="oracle-card">
-    <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.18em;color:#8e44ad;margin-bottom:10px">👁 命運顯示</div>
-    <div id="oracle-path-name" style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:6px"></div>
-    <div id="oracle-path-en" style="font-size:.8rem;color:var(--muted);margin-bottom:16px"></div>
-    <div id="oracle-result-icon"></div>
-    <div id="oracle-result-text"></div>
-    <button class="action-btn btn-gold" style="width:100%" onclick="closeOracle()">明白了 — 繼續討論</button>
-  </div>
-</div>
 
 <!-- ══ END SCREENS ══ -->
 <div class="end-screen" id="victory-screen">
@@ -338,9 +319,9 @@
 <script>
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const CLASSES = {
-  warrior: { name:'Warrior 刪路者', emoji:'⚔️', skill:'IRON WILL!',   skillZh:'鐵壁意志！', color:'#c0392b', gradient:'radial-gradient(ellipse at center,#7b0000 0%,#2a0000 60%,#000 100%)', particle:'⚔️', effect:'消除最危險的路徑！只剩兩條路可選！' },
-  mage:    { name:'Mage 全知者',    emoji:'🧙', skill:'ARCANE MAP!',  skillZh:'奧術地圖！',  color:'#8e44ad', gradient:'radial-gradient(ellipse at center,#5b2082 0%,#1a0030 60%,#000 100%)', particle:'✨', effect:'揭示三條路徑的成功機率！' },
-  seer:    { name:'Seer 先知者',    emoji:'👁️', skill:"FATE'S THREAD!", skillZh:'命運之線！', color:'#16a085', gradient:'radial-gradient(ellipse at center,#003a30 0%,#001018 60%,#000 100%)', particle:'🔮', effect:'窺探一條路徑的命運！結果將綁定！' }
+  warrior: { name:'Warrior 衝鋒者', emoji:'⚔️', skill:'DOUBLE STRIKE!', skillZh:'雙骰衝鋒！', color:'#c0392b', gradient:'radial-gradient(ellipse at center,#7b0000 0%,#2a0000 60%,#000 100%)', particle:'⚔️', effect:'同時擲出兩顆骰子，取最高點數！成功率大幅提升！' },
+  mage:    { name:'Mage 守護者',    emoji:'🧙', skill:'SAFETY NET!',    skillZh:'守護魔法！',  color:'#3d5fe0', gradient:'radial-gradient(ellipse at center,#0a2070 0%,#000820 60%,#000 100%)', particle:'✨', effect:'本關若骰子失敗，可立即免費重擲一次！' },
+  seer:    { name:'Seer 扭曲者',    emoji:'👁️', skill:'FATE BEND!',     skillZh:'命運扭曲！',  color:'#8e44ad', gradient:'radial-gradient(ellipse at center,#3a005a 0%,#100018 60%,#000 100%)', particle:'🔮', effect:'本關所有路徑門檻降低 1！困難路 5+→4+，普通路 4+→3+！' }
 };
 
 const LEVELS = [
@@ -402,7 +383,7 @@ const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
 // ── STATE ────────────────────────────────────────────────────────────────────
 let players = [], currentLevel = 0, selectedPath = null;
 let phase = 'choosing'; // choosing | challenge | rolling | result
-let doublediceActive = false, eliminatedPathId = null, oraclePath = null, oracleResult = null;
+let doubleRollActive = false, mageRerollAvailable = false, seerThresholdBonus = 0;
 let transitioning = false, hostOpen = true;
 
 // ── SETUP ────────────────────────────────────────────────────────────────────
@@ -487,10 +468,9 @@ function loadLevel(idx) {
   currentLevel = idx;
   selectedPath = null;
   phase = 'choosing';
-  doublediceActive = false;
-  eliminatedPathId = null;
-  oraclePath = null;
-  oracleResult = null;
+  doubleRollActive = false;
+  mageRerollAvailable = false;
+  seerThresholdBonus = 0;
   const lv = LEVELS[idx];
   document.getElementById('scene-area').style.background = lv.bg;
   document.getElementById('lv-emoji').textContent = lv.emoji;
@@ -510,11 +490,11 @@ function loadLevel(idx) {
 function renderPaths() {
   const lv = LEVELS[currentLevel];
   document.getElementById('paths-grid').innerHTML = lv.paths.map(p => {
-    const diffLabel = p.diff === 'easy' ? '🟢 Easy · 3+' : p.diff === 'normal' ? '🟡 Normal · 4+' : '🔴 Hard · 5+';
-    const isElim = p.id === eliminatedPathId;
-    return `<div class="path-card${isElim ? ' blocked' : ''}" id="pc-${p.id}" onclick="selectPath('${p.id}')">
-      <div class="oracle-badge" id="ob-${p.id}"></div>
-      <div class="path-percent-badge" id="pp-${p.id}">--</div>
+    const eff = p.threshold + seerThresholdBonus;
+    const bent = seerThresholdBonus < 0;
+    const diffColor = p.diff === 'easy' ? '🟢 Easy' : p.diff === 'normal' ? '🟡 Normal' : '🔴 Hard';
+    const diffLabel = `${diffColor} · ${eff}+${bent ? ' <span style="color:#8e44ad;font-size:.6rem">▼</span>' : ''}`;
+    return `<div class="path-card" id="pc-${p.id}" onclick="selectPath('${p.id}')">
       <div class="path-emoji">${p.emoji}</div>
       <div class="path-name">${p.name}</div>
       <div class="path-name-en">${p.nameEn}</div>
@@ -528,7 +508,7 @@ function selectPath(pid) {
   if (phase !== 'choosing') return;
   const lv = LEVELS[currentLevel];
   selectedPath = lv.paths.find(p => p.id === pid);
-  if (!selectedPath || pid === eliminatedPathId) return;
+  if (!selectedPath) return;
   document.querySelectorAll('.path-card').forEach(c => c.classList.remove('selected'));
   document.getElementById(`pc-${pid}`).classList.add('selected');
   document.getElementById('ch-text').textContent = selectedPath.challenge;
@@ -554,28 +534,11 @@ function hostShowDice() { hostShowChallenge(); }
 function rollDice() {
   if (phase !== 'rolling' || !selectedPath) return;
   phase = 'result';
-  const count = doublediceActive ? 2 : 1;
-  let results, best;
-
-  // If oracle predicted this path, use that result
-  if (oraclePath === selectedPath.id && oracleResult !== null) {
-    const threshold = selectedPath.threshold;
-    // Generate a dice that matches the oracle prediction
-    let roll;
-    if (oracleResult === 'success') {
-      const pool = [4,5,6].filter(r => r >= threshold);
-      roll = pool.length ? pool[Math.floor(Math.random() * pool.length)] : threshold;
-    } else {
-      const pool = [1,2,3].filter(r => r < threshold);
-      roll = pool.length ? pool[Math.floor(Math.random() * pool.length)] : threshold - 1;
-    }
-    results = [roll];
-    best = roll;
-  } else {
-    results = Array.from({length: count}, () => Math.ceil(Math.random() * 6));
-    best = Math.max(...results);
-  }
-
+  const count = doubleRollActive ? 2 : 1;
+  doubleRollActive = false;
+  updateActiveSkills();
+  const results = Array.from({length: count}, () => Math.ceil(Math.random() * 6));
+  const best = Math.max(...results);
   const row = document.getElementById('dice-row');
   row.innerHTML = results.map(() => `<div class="dface rolling">🎲</div>`).join('');
   setTimeout(() => {
@@ -586,20 +549,37 @@ function rollDice() {
 
 function showResult(val) {
   const path = selectedPath;
-  const ok = val >= path.threshold;
+  const eff = path.threshold + seerThresholdBonus;
+  const ok = val >= eff;
   const hp = ok ? path.hpOk : path.hpNg;
   applyHpAll(hp);
-  const resEl = document.getElementById('result-section');
   document.getElementById('res-icon').textContent = ok ? '✅' : '❌';
   const rtEl = document.getElementById('res-text');
-  rtEl.innerHTML = (ok ? path.okText : path.ngText) + (hp ? `<br><span style="font-size:.85rem;color:var(--muted)">骰出 ${val} — 門檻 ${path.threshold}</span>` : `<br><span style="font-size:.85rem;color:var(--muted)">骰出 ${val} — 門檻 ${path.threshold}</span>`);
+  const threshNote = seerThresholdBonus < 0 ? ` (先知降低，原 ${path.threshold}+)` : '';
+  rtEl.innerHTML = (ok ? path.okText : path.ngText) + `<br><span style="font-size:.85rem;color:var(--muted)">骰出 ${val} — 門檻 ${eff}+${threshNote}</span>`;
   rtEl.className = `result-text ${ok ? 'result-ok' : 'result-ng'}`;
+  // Show mage reroll button only on failure and if safety net is armed
+  const rerollBtn = document.getElementById('reroll-btn');
+  rerollBtn.style.display = (!ok && mageRerollAvailable) ? 'inline-block' : 'none';
   const isLast = currentLevel === LEVELS.length - 1;
   const nextBtn = document.getElementById('next-btn');
   nextBtn.textContent = isLast ? '🏆 完成冒險！' : '繼續冒險 ▶';
   nextBtn.onclick = isLast ? showVictory : nextLevel;
-  resEl.style.display = 'block';
-  document.getElementById('level-phase').textContent = ok ? '✅ 成功！' : '❌ 失敗...';
+  document.getElementById('result-section').style.display = 'block';
+  document.getElementById('level-phase').textContent = ok ? '✅ 成功！' : ((!ok && mageRerollAvailable) ? '❌ 失敗... 還有機會！' : '❌ 失敗...');
+}
+
+function doMageReroll() {
+  mageRerollAvailable = false;
+  updateActiveSkills();
+  // Undo the failure HP before rerolling
+  applyHpAll(-selectedPath.hpNg);
+  document.getElementById('reroll-btn').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('dice-row').innerHTML = '';
+  document.getElementById('dice-section').style.display = 'block';
+  phase = 'rolling';
+  document.getElementById('level-phase').textContent = '🔮 守護魔法——重新擲骰！';
 }
 
 function nextLevel() {
@@ -640,69 +620,35 @@ function useSkill(pIdx) {
   setTimeout(() => {
     ov.style.transition = 'opacity .6s ease'; ov.style.opacity = '0';
     setTimeout(() => { ov.style.display = 'none'; ov.style.opacity = '1'; ov.style.transition = ''; document.getElementById('skill-particles').innerHTML = ''; }, 650);
-    if (p.clsKey === 'warrior') applyEliminate();
-    else if (p.clsKey === 'mage') applyReveal();
-    else if (p.clsKey === 'seer') showOraclePicker();
+    if (p.clsKey === 'warrior') applyDoubleStrike();
+    else if (p.clsKey === 'mage') applyMageSafetyNet();
+    else if (p.clsKey === 'seer') applySeerBend();
   }, 2600);
 }
 
-function applyEliminate() {
-  // Eliminate the hardest path
-  const lv = LEVELS[currentLevel];
-  const hard = lv.paths.find(p => p.diff === 'hard') || lv.paths[lv.paths.length - 1];
-  eliminatedPathId = hard.id;
-  const card = document.getElementById(`pc-${hard.id}`);
-  if (card) card.classList.add('blocked');
-  if (selectedPath?.id === hard.id) { selectedPath = null; document.getElementById('challenge-section').classList.remove('open'); phase = 'choosing'; }
+function applyDoubleStrike() {
+  doubleRollActive = true;
+  updateActiveSkills();
 }
 
-function applyReveal() {
-  LEVELS[currentLevel].paths.forEach(p => {
-    const badge = document.getElementById(`pp-${p.id}`);
-    const card = document.getElementById(`pc-${p.id}`);
-    if (badge && card) {
-      card.classList.add('revealed');
-      badge.textContent = '0%';
-      let cur = 0;
-      const tick = () => { cur = Math.min(cur + 2, p.percent); badge.textContent = cur + '%'; if (cur < p.percent) requestAnimationFrame(tick); };
-      requestAnimationFrame(tick);
-    }
-  });
+function applyMageSafetyNet() {
+  mageRerollAvailable = true;
+  updateActiveSkills();
 }
 
-function showOraclePicker() {
-  // Show oracle overlay with path buttons to pick from
-  document.getElementById('oracle-path-name').textContent = '選擇要窺探的路徑：';
-  document.getElementById('oracle-path-en').textContent = 'Pick one path to see its fate.';
-  document.getElementById('oracle-result-icon').innerHTML = LEVELS[currentLevel].paths.map(p =>
-    `<button class="action-btn btn-outline" style="margin:4px;font-size:.85rem" onclick="peekPath('${p.id}')">${p.emoji} ${p.name}</button>`
-  ).join('');
-  document.getElementById('oracle-result-text').textContent = '';
-  document.getElementById('oracle-overlay').querySelector('.action-btn.btn-gold').style.display = 'none';
-  document.getElementById('oracle-overlay').style.display = 'flex';
+function applySeerBend() {
+  seerThresholdBonus = -1;
+  renderPaths();
+  updateActiveSkills();
 }
 
-function peekPath(pid) {
-  const lv = LEVELS[currentLevel];
-  const path = lv.paths.find(p => p.id === pid);
-  if (!path) return;
-  const r = Math.ceil(Math.random() * 6);
-  const ok = r >= path.threshold;
-  oraclePath = pid;
-  oracleResult = ok ? 'success' : 'fail';
-  document.getElementById('oracle-path-name').textContent = path.emoji + ' ' + path.name;
-  document.getElementById('oracle-path-en').textContent = path.nameEn;
-  document.getElementById('oracle-result-icon').innerHTML = ok ? '✅' : '❌';
-  document.getElementById('oracle-result-text').innerHTML = ok
-    ? `<span style="color:var(--green)">命運顯示：這條路將會成功！<br><small style="color:var(--muted)">The path is safe — if you choose it, you will succeed.</small></span>`
-    : `<span style="color:var(--red)">命運顯示：這條路將會失敗！<br><small style="color:var(--muted)">The path is cursed — choosing it leads to failure.</small></span>`;
-  // Mark the card
-  const badge = document.getElementById(`ob-${pid}`);
-  if (badge) { badge.textContent = ok ? '👁 成功' : '👁 失敗'; badge.className = `oracle-badge ${ok ? 'oracle-ok' : 'oracle-bad'}`; badge.style.display = 'block'; }
-  document.getElementById('oracle-overlay').querySelector('.action-btn.btn-gold').style.display = '';
+function updateActiveSkills() {
+  const chips = [];
+  if (doubleRollActive)      chips.push(`<span style="background:rgba(192,57,43,.25);color:#e74c3c;padding:3px 12px;border-radius:12px;font-size:.72rem;font-weight:700">⚔️ 雙骰衝鋒！</span>`);
+  if (mageRerollAvailable)   chips.push(`<span style="background:rgba(61,95,224,.25);color:#5d80ff;padding:3px 12px;border-radius:12px;font-size:.72rem;font-weight:700">🧙 安全網啟動！</span>`);
+  if (seerThresholdBonus < 0) chips.push(`<span style="background:rgba(142,68,173,.25);color:#b06cff;padding:3px 12px;border-radius:12px;font-size:.72rem;font-weight:700">👁 門檻已降低！</span>`);
+  document.getElementById('active-skills').innerHTML = chips.join('');
 }
-
-function closeOracle() { document.getElementById('oracle-overlay').style.display = 'none'; }
 
 function spawnParticles(emoji) {
   const container = document.getElementById('skill-particles');
