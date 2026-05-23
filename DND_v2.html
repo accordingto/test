@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英語勇者團 v2 — 路徑抉擇</title>
+  <style>
+    :root {
+      --bg: #0d0d1a; --surface: #16162a; --card: #1e1e35;
+      --gold: #d4a843; --gold-l: #f0c96a;
+      --red: #c0392b; --green: #27ae60; --blue: #3d5fe0; --purple: #8e44ad;
+      --text: #e8dfc8; --muted: #7a7a9a; --border: #2e2e50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* ── SETUP ── */
+    #setup-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; background: radial-gradient(ellipse at center, #1a0a3a 0%, #0d0d1a 70%); }
+    .setup-title { font-size: 2.6rem; color: var(--gold); text-shadow: 0 0 30px rgba(212,168,67,.5); margin-bottom: 6px; text-align: center; }
+    .setup-sub { color: var(--muted); margin-bottom: 36px; text-align: center; font-size: .9rem; }
+    .setup-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 520px; }
+    .setup-card h2 { color: var(--gold); font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 14px; }
+    .player-row { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+    .player-icon { font-size: 1.3rem; width: 30px; text-align: center; flex-shrink: 0; }
+    .player-row input { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: .9rem; outline: none; transition: border-color .2s; }
+    .player-row input:focus { border-color: var(--gold); }
+    .player-row input::placeholder { color: var(--muted); }
+    .cls-group { display: flex; gap: 3px; flex-shrink: 0; }
+    .cls-btn { width: 28px; height: 28px; border-radius: 6px; border: 2px solid var(--border); background: transparent; cursor: pointer; font-size: .95rem; transition: all .15s; display: flex; align-items: center; justify-content: center; padding: 0; }
+    .cls-btn.active { border-color: var(--gold); background: rgba(212,168,67,.2); }
+    .btn-rm { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--border); color: var(--muted); cursor: pointer; font-size: .8rem; flex-shrink: 0; }
+    .btn-rm:hover { background: var(--red); color: #fff; }
+    .btn-add-player { width: 100%; padding: 8px; margin-top: 6px; background: transparent; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; font-size: .85rem; }
+    .btn-add-player:hover { border-color: var(--gold); color: var(--gold); }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .cls-legend { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 22px; }
+    .cls-info { background: var(--surface); border-radius: 8px; padding: 10px 8px; text-align: center; border: 1px solid var(--border); }
+    .cls-info-emoji { font-size: 1.4rem; margin-bottom: 4px; }
+    .cls-info-name { font-size: .7rem; font-weight: 700; color: var(--text); }
+    .cls-info-skill { font-size: .62rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+    .btn-start { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold), #c8962a); color: #000; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: opacity .2s, transform .1s; }
+    .btn-start:hover { opacity: .9; } .btn-start:active { transform: scale(.98); }
+
+    /* ── GAME SCREEN ── */
+    #game-screen { display: none; flex-direction: column; min-height: 100vh; }
+
+    /* HP Bar */
+    #hp-bar { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .p-hp { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .p-hp-name { font-size: .7rem; color: var(--muted); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .p-hp-hearts { display: flex; gap: 2px; font-size: .95rem; }
+    .p-hp-class { font-size: .58rem; text-transform: uppercase; letter-spacing: .1em; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+
+    /* Level Header */
+    #level-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .level-dots { display: flex; gap: 6px; }
+    .lvl-dot { width: 28px; height: 8px; border-radius: 4px; background: var(--border); transition: all .3s; }
+    .lvl-dot.active { background: var(--gold); }
+    .lvl-dot.done { background: var(--muted); }
+    #level-phase { font-size: .72rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); }
+
+    /* Scene Area */
+    #scene-area { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 12px; transition: background 1s ease; }
+    .level-emoji { font-size: 3.5rem; margin-bottom: 8px; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .level-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 4px; text-align: center; }
+    .level-lore { font-size: .82rem; color: var(--muted); margin-bottom: 20px; max-width: 560px; text-align: center; line-height: 1.6; font-style: italic; }
+
+    /* Path Cards */
+    .paths-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 720px; margin-bottom: 20px; }
+    .path-card { background: var(--card); border: 2px solid var(--border); border-radius: 14px; padding: 18px 14px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; text-align: center; }
+    .path-card:hover:not(.blocked):not(.selected) { border-color: var(--muted); transform: translateY(-3px); }
+    .path-card.selected { border-color: var(--gold); box-shadow: 0 0 24px rgba(212,168,67,.25); transform: translateY(-3px); }
+    .path-card.blocked { opacity: .35; cursor: not-allowed; pointer-events: none; }
+    .path-card.blocked::after { content: '🚫'; position: absolute; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+    .path-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+    .path-name { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .path-name-en { font-size: .7rem; color: var(--muted); margin-bottom: 8px; }
+    .diff-badge { font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 8px; }
+    .diff-easy   { background: rgba(39,174,96,.18); color: #27ae60; }
+    .diff-normal { background: rgba(212,168,67,.18); color: var(--gold); }
+    .diff-hard   { background: rgba(192,57,43,.18);  color: #e74c3c; }
+    .path-desc { font-size: .75rem; color: var(--muted); line-height: 1.5; }
+    .path-percent-badge { position: absolute; top: 8px; right: 8px; background: rgba(142,68,173,.9); color: #fff; font-size: .9rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; display: none; }
+    .path-card.revealed .path-percent-badge { display: block; }
+    .oracle-badge { position: absolute; top: 8px; left: 8px; font-size: .8rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; display: none; }
+    .oracle-ok  { background: rgba(39,174,96,.9);  color: #fff; }
+    .oracle-bad { background: rgba(192,57,43,.9);  color: #fff; }
+
+    /* Challenge Section */
+    #challenge-section { max-height: 0; overflow: hidden; transition: max-height .5s ease; width: 100%; max-width: 600px; }
+    #challenge-section.open { max-height: 320px; }
+    .challenge-inner { background: rgba(212,168,67,.07); border: 2px solid var(--gold); border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; text-align: center; }
+    .ch-label { font-size: .63rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); margin-bottom: 8px; }
+    .ch-text { font-size: 1rem; color: #fff; line-height: 1.6; font-weight: 500; margin-bottom: 8px; }
+    .ch-format { font-size: .82rem; color: var(--gold-l); font-style: italic; margin-bottom: 6px; }
+    .ch-hint { font-size: .74rem; color: var(--muted); }
+
+    /* Dice + Result */
+    #dice-section { text-align: center; margin-bottom: 12px; display: none; }
+    #result-section { text-align: center; display: none; animation: popIn .4s ease; }
+    @keyframes popIn { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+    .dice-row { display: flex; gap: 10px; justify-content: center; margin: 10px 0; }
+    .dface { width: 56px; height: 56px; background: var(--surface); border: 2px solid var(--gold); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--gold); font-weight: 700; }
+    .dface.rolling { animation: shake .45s ease; }
+    @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-18deg) scale(1.1)} 75%{transform:rotate(18deg) scale(1.1)} }
+    .result-icon { font-size: 3rem; margin-bottom: 8px; }
+    .result-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+    .result-ok { color: var(--green); } .result-ng { color: var(--red); }
+
+    /* Buttons */
+    .action-btn { padding: 12px 28px; border: none; border-radius: 10px; font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s; }
+    .action-btn:hover { opacity: .85; } .action-btn:active { transform: scale(.97); }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+    /* ── HOST PANEL ── */
+    #host-panel { background: var(--surface); border-top: 2px solid var(--gold); }
+    #host-toggle { width: 100%; padding: 10px 20px; background: transparent; border: none; color: var(--gold); cursor: pointer; font-size: .8rem; font-weight: 600; text-align: center; text-transform: uppercase; letter-spacing: .1em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    #host-body { padding: 16px 20px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 900px; margin: 0 auto; }
+    .h-section { background: var(--card); border-radius: 10px; padding: 14px; }
+    .h-section h3 { font-size: .63rem; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); margin-bottom: 10px; }
+    .h-section.full { grid-column: span 2; }
+    .script-body { font-size: .8rem; line-height: 1.7; } .script-body strong { color: var(--gold-l); } .script-body em { color: #aaa; font-style: italic; }
+    .ctrl-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .hbtn { flex: 1; padding: 10px 6px; border: none; border-radius: 8px; cursor: pointer; font-size: .78rem; font-weight: 600; transition: opacity .15s, transform .1s; }
+    .hbtn:hover { opacity: .85; } .hbtn:active { transform: scale(.97); }
+    .hbtn-gold { background: var(--gold); color: #000; } .hbtn-blue { background: var(--blue); color: #fff; }
+    .hbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .hbtn:disabled { opacity: .28; cursor: not-allowed; }
+    .hp-ctrls { display: flex; flex-wrap: wrap; gap: 8px; }
+    .hp-ctrl { display: flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 8px; padding: 6px 10px; }
+    .hp-ctrl-name { font-size: .75rem; min-width: 44px; }
+    .hp-cbtn { width: 24px; height: 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; }
+    .hp-plus { background: var(--green); color: #fff; } .hp-minus { background: var(--red); color: #fff; }
+    .skill-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .skill-row:last-child { border-bottom: none; }
+    .skill-who { font-size: .78rem; color: var(--text); flex: 1; }
+    .skill-btn { padding: 6px 12px; border: none; border-radius: 8px; cursor: pointer; font-size: .75rem; font-weight: 700; transition: opacity .15s; }
+    .skill-btn:hover { opacity: .85; }
+    .skill-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+    /* ── TRANSITION OVERLAY ── */
+    #transition-overlay { position: fixed; inset: 0; z-index: 200; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+    #trans-card { text-align: center; opacity: 0; transform: scale(.85); transition: opacity .4s ease, transform .4s ease; }
+    #trans-card.visible { opacity: 1; transform: scale(1); }
+    #trans-emoji { font-size: 4.5rem; margin-bottom: 14px; }
+    #trans-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .25em; color: var(--gold); margin-bottom: 8px; }
+    #trans-divider { height: 1px; width: 60px; background: var(--gold); margin: 0 auto 14px; }
+    #trans-title { font-size: 2.3rem; font-weight: 700; color: #fff; }
+
+    /* ── SKILL OVERLAY ── */
+    #skill-overlay { position: fixed; inset: 0; z-index: 180; display: none; align-items: center; justify-content: center; overflow: hidden; }
+    #skill-particles { position: absolute; inset: 0; pointer-events: none; }
+    .particle { position: absolute; animation: particleRise linear forwards; pointer-events: none; }
+    @keyframes particleRise { 0%{transform:translateY(0) rotate(0) scale(1);opacity:.9} 100%{transform:translateY(-110vh) rotate(720deg) scale(.2);opacity:0} }
+    #skill-inner { position: relative; z-index: 1; text-align: center; padding: 20px; }
+    #skill-player-name { font-size: .8rem; letter-spacing: .2em; color: rgba(255,255,255,.6); text-transform: uppercase; margin-bottom: 14px; }
+    #skill-big-emoji { font-size: 5rem; margin-bottom: 14px; animation: float 1s ease-in-out infinite; }
+    #skill-name { font-size: 2.8rem; font-weight: 900; letter-spacing: .06em; animation: skillPulse .5s ease-in-out infinite alternate; }
+    @keyframes skillPulse { from{transform:scale(1);filter:brightness(1)} to{transform:scale(1.05);filter:brightness(1.4)} }
+    #skill-name-zh { font-size: 1.2rem; color: rgba(255,255,255,.8); margin-top: 8px; }
+    #skill-effect { font-size: .88rem; color: rgba(255,255,255,.6); margin-top: 12px; font-style: italic; max-width: 320px; line-height: 1.5; }
+
+    /* ── ORACLE PEEK ── */
+    #oracle-overlay { position: fixed; inset: 0; z-index: 160; background: rgba(0,0,0,.9); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #oracle-card { background: var(--card); border: 2px solid #8e44ad; border-radius: 18px; padding: 28px 22px; max-width: 400px; width: 100%; text-align: center; animation: slideUp .35s ease; }
+    @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+    #oracle-result-icon { font-size: 3rem; margin: 12px 0; }
+    #oracle-result-text { font-size: 1.05rem; font-weight: 600; line-height: 1.6; margin-bottom: 20px; }
+
+    /* ── END SCREENS ── */
+    .end-screen { position: fixed; inset: 0; background: rgba(0,0,0,.93); flex-direction: column; align-items: center; justify-content: center; z-index: 100; display: none; padding: 20px; text-align: center; }
+    .end-emoji { font-size: 6rem; margin-bottom: 18px; }
+    .end-title { font-size: 2.8rem; font-weight: 700; margin-bottom: 10px; }
+    .end-sub { font-size: 1rem; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+
+    @media (max-width: 600px) {
+      .paths-grid { grid-template-columns: 1fr; }
+      #host-body { grid-template-columns: 1fr; }
+      .h-section.full { grid-column: span 1; }
+      .setup-title { font-size: 1.9rem; }
+      #skill-name { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div id="setup-screen">
+  <div class="setup-title">⚔️ 英語勇者團 v2</div>
+  <div class="setup-sub">路徑抉擇 — 每一關都要做出選擇！</div>
+  <div class="setup-card">
+    <h2>👥 玩家設定（最多 5 人）</h2>
+    <div id="player-list">
+      <div class="player-row">
+        <span class="player-icon">⚔️</span>
+        <input type="text" placeholder="玩家 1 姓名">
+        <div class="cls-group">
+          <button class="cls-btn active" data-cls="warrior" onclick="pickClass(this)" title="Warrior">⚔️</button>
+          <button class="cls-btn" data-cls="mage" onclick="pickClass(this)" title="Mage">🧙</button>
+          <button class="cls-btn" data-cls="seer" onclick="pickClass(this)" title="Seer">👁️</button>
+        </div>
+        <button class="btn-rm" onclick="rmPlayer(this)">✕</button>
+      </div>
+      <div class="player-row">
+        <span class="player-icon">🧙</span>
+        <input type="text" placeholder="玩家 2 姓名">
+        <div class="cls-group">
+          <button class="cls-btn" data-cls="warrior" onclick="pickClass(this)">⚔️</button>
+          <button class="cls-btn active" data-cls="mage" onclick="pickClass(this)">🧙</button>
+          <button class="cls-btn" data-cls="seer" onclick="pickClass(this)">👁️</button>
+        </div>
+        <button class="btn-rm" onclick="rmPlayer(this)">✕</button>
+      </div>
+    </div>
+    <button class="btn-add-player" onclick="addPlayer()">＋ 新增玩家</button>
+    <div class="divider"></div>
+    <h2>🔮 職業技能說明（每人限用一次）</h2>
+    <div class="cls-legend">
+      <div class="cls-info"><div class="cls-info-emoji">⚔️</div><div class="cls-info-name">Warrior 刪路者</div><div class="cls-info-skill">消除最危險的路徑，只剩 2 條路可選</div></div>
+      <div class="cls-info"><div class="cls-info-emoji">🧙</div><div class="cls-info-name">Mage 全知者</div><div class="cls-info-skill">顯示三條路徑各自的成功機率</div></div>
+      <div class="cls-info"><div class="cls-info-emoji">👁️</div><div class="cls-info-name">Seer 先知者</div><div class="cls-info-skill">窺探一條路徑的命運：成功或失敗（結果綁定）</div></div>
+    </div>
+    <button class="btn-start" onclick="startGame()">🗡️ 開始冒險！</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="game-screen">
+  <div id="hp-bar"></div>
+  <div id="level-header">
+    <div class="level-dots" id="level-dots"></div>
+    <div id="level-phase">🗺️ 選擇路徑</div>
+  </div>
+  <div id="scene-area">
+    <div class="level-emoji" id="lv-emoji">🌲</div>
+    <div class="level-title" id="lv-title"></div>
+    <div class="level-lore" id="lv-lore"></div>
+    <div class="paths-grid" id="paths-grid"></div>
+    <div id="challenge-section">
+      <div class="challenge-inner">
+        <div class="ch-label">🎯 英語挑戰 — 說完才能骰骰子！</div>
+        <div class="ch-text" id="ch-text"></div>
+        <div class="ch-format" id="ch-format"></div>
+        <div class="ch-hint" id="ch-hint"></div>
+      </div>
+    </div>
+    <div id="dice-section">
+      <div class="dice-row" id="dice-row"></div>
+      <button class="action-btn btn-gold" onclick="rollDice()">🎲 骰骰子！</button>
+    </div>
+    <div id="result-section">
+      <div class="result-icon" id="res-icon"></div>
+      <div class="result-text" id="res-text"></div>
+      <button class="action-btn btn-green" onclick="nextLevel()" id="next-btn">繼續冒險 ▶</button>
+    </div>
+  </div>
+  <div id="host-panel">
+    <button id="host-toggle" onclick="toggleHost()"><span id="host-icon">▲</span> 主持人控制台</button>
+    <div id="host-body">
+      <div class="h-section full">
+        <h3>📜 關卡腳本 &amp; 路徑說明</h3>
+        <div class="script-body" id="script-body"></div>
+      </div>
+      <div class="h-section">
+        <h3>🎛️ 場景控制</h3>
+        <div class="ctrl-row">
+          <button class="hbtn hbtn-outline" onclick="hostShowChallenge()">✅ 顯示挑戰</button>
+          <button class="hbtn hbtn-blue" onclick="hostShowDice()">🎲 顯示骰子</button>
+        </div>
+        <div class="ctrl-row">
+          <button class="hbtn hbtn-outline" onclick="showVictory()">🏆 勝利</button>
+          <button class="hbtn hbtn-outline" onclick="showGameOver()">💀 Game Over</button>
+        </div>
+      </div>
+      <div class="h-section">
+        <h3>✨ 技能發動</h3>
+        <div id="skill-rows"></div>
+      </div>
+      <div class="h-section full">
+        <h3>❤️ 血量管理</h3>
+        <div class="hp-ctrls" id="hp-ctrls"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRANSITION ══ -->
+<div id="transition-overlay">
+  <div id="trans-card">
+    <div id="trans-emoji"></div>
+    <div id="trans-label"></div>
+    <div id="trans-divider"></div>
+    <div id="trans-title"></div>
+  </div>
+</div>
+
+<!-- ══ SKILL OVERLAY ══ -->
+<div id="skill-overlay">
+  <div id="skill-particles"></div>
+  <div id="skill-inner">
+    <div id="skill-player-name"></div>
+    <div id="skill-big-emoji"></div>
+    <div id="skill-name"></div>
+    <div id="skill-name-zh"></div>
+    <div id="skill-effect"></div>
+  </div>
+</div>
+
+<!-- ══ ORACLE OVERLAY ══ -->
+<div id="oracle-overlay">
+  <div id="oracle-card">
+    <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.18em;color:#8e44ad;margin-bottom:10px">👁 命運顯示</div>
+    <div id="oracle-path-name" style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:6px"></div>
+    <div id="oracle-path-en" style="font-size:.8rem;color:var(--muted);margin-bottom:16px"></div>
+    <div id="oracle-result-icon"></div>
+    <div id="oracle-result-text"></div>
+    <button class="action-btn btn-gold" style="width:100%" onclick="closeOracle()">明白了 — 繼續討論</button>
+  </div>
+</div>
+
+<!-- ══ END SCREENS ══ -->
+<div class="end-screen" id="victory-screen">
+  <div class="end-emoji">🏆</div>
+  <div class="end-title" style="color:var(--gold)">勝利！Victory!</div>
+  <div class="end-sub">你們做出了正確的抉擇，成功闖過五關！<br><strong style="color:var(--gold-l)">Excellent English, adventurers!</strong></div>
+  <button class="btn-start" style="max-width:240px" onclick="resetGame()">🔄 再玩一次</button>
+</div>
+<div class="end-screen" id="gameover-screen">
+  <div class="end-emoji">💀</div>
+  <div class="end-title" style="color:var(--red)">Game Over...</div>
+  <div class="end-sub">勇者們在旅途中倒下了...<br>但每一次選擇都是一種學習！</div>
+  <button class="btn-start" style="max-width:240px" onclick="resetGame()">🔄 再試一次</button>
+</div>
+
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+const CLASSES = {
+  warrior: { name:'Warrior 刪路者', emoji:'⚔️', skill:'IRON WILL!',   skillZh:'鐵壁意志！', color:'#c0392b', gradient:'radial-gradient(ellipse at center,#7b0000 0%,#2a0000 60%,#000 100%)', particle:'⚔️', effect:'消除最危險的路徑！只剩兩條路可選！' },
+  mage:    { name:'Mage 全知者',    emoji:'🧙', skill:'ARCANE MAP!',  skillZh:'奧術地圖！',  color:'#8e44ad', gradient:'radial-gradient(ellipse at center,#5b2082 0%,#1a0030 60%,#000 100%)', particle:'✨', effect:'揭示三條路徑的成功機率！' },
+  seer:    { name:'Seer 先知者',    emoji:'👁️', skill:"FATE'S THREAD!", skillZh:'命運之線！', color:'#16a085', gradient:'radial-gradient(ellipse at center,#003a30 0%,#001018 60%,#000 100%)', particle:'🔮', effect:'窺探一條路徑的命運！結果將綁定！' }
+};
+
+const LEVELS = [
+  { num:1, title:'魔法森林', titleEn:'The Enchanted Forest', emoji:'🌲', bg:'radial-gradient(ellipse at 50% 60%,#0a2a0d 0%,#0a0a0f 80%)',
+    lore:'Ancient trees tower above you. Their branches weave a canopy of shadows. Three paths lead deeper into the forest...',
+    loreZh:'古老的樹木聳立在你四周，樹枝交錯遮蔽天空。三條路徑延伸向森林深處...',
+    paths:[
+      { id:'a', emoji:'🌿', name:'林間小徑', nameEn:'Forest Trail',     diff:'easy',   threshold:3, percent:67, hpOk:0,  hpNg:-1, desc:'A winding path through mossy trees. Safe but slow.', descZh:'蜿蜒穿越苔蘚覆蓋的樹林。安全，但費時。', challenge:'Describe what you can see, hear, and smell in the forest.', format:'"I can see ___, I can hear ___, and I can smell ___."', hint:'例：I can see tall green trees, I can hear birds singing, and I can smell fresh earth.', okText:'🌿 林間精靈引路！隊伍安全通過！', ngText:'😱 迷失在林中... 全隊 -1 ❤️' },
+      { id:'b', emoji:'🌊', name:'急流渡口', nameEn:'River Crossing',   diff:'normal', threshold:4, percent:50, hpOk:1,  hpNg:-1, desc:'A rushing river with stepping stones. Risky but faster.', descZh:'湍急的河流上有幾塊踏腳石。危險，但可快一點。', challenge:'Tell us about a time when you had to be brave. What happened?', format:'"One time I was scared because ___. But I ___ and I felt ___."', hint:'例：One time I was scared because I had to speak in front of everyone. But I did it and I felt proud.', okText:'💪 成功渡河！全隊 +1 ❤️！', ngText:'🌊 被急流沖走！全隊 -1 ❤️！' },
+      { id:'c', emoji:'🕳️', name:'幽暗洞穴', nameEn:'Dark Cave',        diff:'hard',   threshold:5, percent:33, hpOk:2,  hpNg:-2, desc:'A shortcut through a dark cave. Dangerous but could save time.', descZh:'穿越幽暗洞穴的捷徑。危險，但省時。', challenge:"Convince the group to enter the dark cave! Be persuasive!", format:'"We should enter the cave because ___! I promise it will ___!"', hint:"例：We should enter the cave because it's faster! I promise it will be safe, I can lead the way!", okText:'🏆 成功穿越洞穴！全隊 +2 ❤️！', ngText:'👹 洞穴怪物出現！全隊 -2 ❤️！' }
+    ],
+    script:`<strong>【旁白】</strong><br><em>You stand at the edge of an ancient forest. The air is thick with magic. Three paths stretch before you...</em><br><br><strong>【路徑說明】</strong><br>🌿 林間小徑 (Easy 3+)：說出在森林中看到/聽到/聞到的事物<br>🌊 急流渡口 (Normal 4+)：分享一次自己很勇敢的經歷<br>🕳️ 幽暗洞穴 (Hard 5+)：說服大家進入洞穴（需有說服力！）<br><br><em>討論後，主持人點選路徑 → 玩家完成英語挑戰 → 骰骰子</em>`
+  },
+  { num:2, title:'沙漠廢墟', titleEn:'The Desert Ruins', emoji:'🏜️', bg:'radial-gradient(ellipse at 50% 80%,#2a1a0a 0%,#0a0a0f 80%)',
+    lore:'The blazing sun scorches the sand. Ancient ruins shimmer in the heat. Three routes cross the scorching desert...',
+    loreZh:'烈日灼燒著沙子。古老廢墟在熱浪中隱約可見。三條路穿越沙漠...',
+    paths:[
+      { id:'a', emoji:'🛤️', name:'商旅古道', nameEn:'Ancient Trade Road',    diff:'easy',   threshold:3, percent:67, hpOk:0,  hpNg:-1, desc:'A well-worn caravan route. Slow but reliable.', descZh:'商旅走過的古老路線。緩慢，但可靠。', challenge:'Name 3 things you would bring on a desert journey and why!', format:'"I would bring ___ because ___, ___ because ___, and ___ because ___."', hint:'例：I would bring water because I\'ll be thirsty, a hat because of the sun, and a map because I might get lost.', okText:'🛤️ 順利走完古道！隊伍安全通過！', ngText:'🌵 路上遇到沙塵暴！全隊 -1 ❤️！' },
+      { id:'b', emoji:'🌵', name:'沙丘小徑', nameEn:'Sand Dune Path',         diff:'normal', threshold:4, percent:50, hpOk:1,  hpNg:-1, desc:'A winding route through towering sand dunes. Unpredictable.', descZh:'蜿蜒穿越高大沙丘的路徑。方向難以掌握。', challenge:'If you were lost in the desert, what would you do? Tell us your plan!', format:'"First I would ___. Then I would ___. Finally I would ___."', hint:'例：First I would find shade. Then I would look for water. Finally I would signal for help.', okText:'🌵 成功穿越沙丘！全隊 +1 ❤️！', ngText:'😵 在沙丘中迷路了！全隊 -1 ❤️！' },
+      { id:'c', emoji:'🏺', name:'地下通道', nameEn:'Underground Passage',   diff:'hard',   threshold:5, percent:33, hpOk:2,  hpNg:-2, desc:'Ancient ruins hide a tunnel beneath the desert. Very risky.', descZh:'古老廢墟下藏著一條地下通道。極度危險。', challenge:'Tell us your greatest fear and how you would face it!', format:'"My greatest fear is ___. I would face it by ___. I know I can because ___."', hint:'例：My greatest fear is spiders. I would face it by taking deep breaths. I know I can because I am brave!', okText:'🏺 地下通道探索成功！全隊 +2 ❤️！', ngText:'💥 地下通道坍塌！全隊 -2 ❤️！' }
+    ],
+    script:`<strong>【旁白】</strong><br><em>The sun blazes overhead. Sand stretches as far as the eye can see. The group must cross the desert before water runs out...</em><br><br><strong>【路徑說明】</strong><br>🛤️ 商旅古道 (Easy 3+)：說出三樣你會帶去沙漠的東西和原因<br>🌵 沙丘小徑 (Normal 4+)：描述迷路時你的應對計劃<br>🏺 地下通道 (Hard 5+)：說出你最大的恐懼以及如何面對它`
+  },
+  { num:3, title:'冰封山脈', titleEn:'The Frozen Mountain', emoji:'⛰️', bg:'radial-gradient(ellipse at 50% 30%,#0a1a3a 0%,#0a0a0f 80%)',
+    lore:'A bitter wind howls through icy peaks. The path to the summit splits in three directions...',
+    loreZh:'刺骨的寒風在山峰間呼嘯。三條路通往山頂...',
+    paths:[
+      { id:'a', emoji:'🏘️', name:'山村繞道', nameEn:'Village Route',  diff:'easy',   threshold:3, percent:67, hpOk:0,  hpNg:-1, desc:'A detour through a mountain village. Warmth and safety.', descZh:'繞道穿越山中小村莊。溫暖且安全。', challenge:'Describe your ideal winter day from morning to night!', format:'"In the morning I would ___. In the afternoon I would ___. At night I would ___."', hint:'例：In the morning I would drink hot cocoa. In the afternoon I would build a snowman. At night I would read by the fire.', okText:'🏘️ 山村居民熱情招待！隊伍安全通過！', ngText:'🌨️ 村民關閉大門！全隊 -1 ❤️！' },
+      { id:'b', emoji:'🧊', name:'冰壁峭路', nameEn:'Ice Cliff Path',   diff:'normal', threshold:4, percent:50, hpOk:1,  hpNg:-1, desc:'A narrow ledge along a frozen cliff. Requires skill.', descZh:'沿著冰封懸崖的狹窄棧道。需要技巧。', challenge:'What is one thing you are really good at? Explain how you got good at it!', format:'"I am really good at ___. I got good at it by ___. The hardest part was ___."', hint:'例：I am really good at cooking. I got good at it by practicing every day. The hardest part was learning to use a knife.', okText:'🧊 成功攀越冰壁！全隊 +1 ❤️！', ngText:'💦 滑落冰壁！全隊 -1 ❤️！' },
+      { id:'c', emoji:'❄️', name:'雪崩危區', nameEn:'Avalanche Zone',   diff:'hard',   threshold:5, percent:33, hpOk:2,  hpNg:-2, desc:'A direct route through an avalanche danger zone. Extremely risky.', descZh:'直接穿越雪崩危險區域。極度危險。', challenge:'Create a short adventure story in 3 sentences! Make it exciting!', format:'"Once there was ___. One day ___. In the end ___!"', hint:'例：Once there was a brave knight. One day he faced a fire-breathing dragon and said "I am not afraid!" In the end he defeated the dragon and saved the village!', okText:'❄️ 飛速穿越雪崩區！全隊 +2 ❤️！', ngText:'🏔️ 雪崩爆發！全隊 -2 ❤️！' }
+    ],
+    script:`<strong>【旁白】</strong><br><em>The mountain looms before you. Ice glistens in the pale sunlight. One wrong step could be deadly...</em><br><br><strong>【路徑說明】</strong><br>🏘️ 山村繞道 (Easy 3+)：描述你理想的冬天一天<br>🧊 冰壁峭路 (Normal 4+)：說出你最擅長的事及學習過程<br>❄️ 雪崩危區 (Hard 5+)：即興創作三句冒險故事`
+  },
+  { num:4, title:'地精要塞', titleEn:'The Goblin Fortress', emoji:'👺', bg:'radial-gradient(ellipse at 50% 50%,#1a0a0a 0%,#0a0a0f 80%)',
+    lore:'The stench of goblin camps fills the air. Torches flicker in the darkness. Three paths lead through goblin territory...',
+    loreZh:'地精營地的惡臭充斥空氣。火把在黑暗中搖曳。三條路穿越地精領土...',
+    paths:[
+      { id:'a', emoji:'🚪', name:'正門入口', nameEn:'Front Gate',       diff:'easy',   threshold:3, percent:67, hpOk:0,  hpNg:-1, desc:'Talk your way past the goblin guards.', descZh:'大搖大擺走向地精城門，試圖用言語說服。', challenge:'Make up a deal to offer the goblins! What will you trade for safe passage?', format:'"Dear goblins! I will give you ___ if you let us pass! I promise ___!"', hint:'例：Dear goblins! I will give you ten golden coins if you let us pass! I promise we will leave quietly!', okText:'🚪 地精接受交易！隊伍安全通過！', ngText:'👺 地精不接受！全隊 -1 ❤️！' },
+      { id:'b', emoji:'🌿', name:'秘密小道', nameEn:'Secret Passage',   diff:'normal', threshold:4, percent:50, hpOk:1,  hpNg:-1, desc:'Sneak through a hidden path at the back of the fortress.', descZh:'從要塞後方穿越的隱秘小路。需要機靈。', challenge:'Describe yourself using 3 adjectives. Explain each one with an example!', format:'"I am ___ because ___. I am also ___ because ___. And I am ___ because ___."', hint:'例：I am creative because I love drawing. I am also kind because I help my friends. And I am funny because I always make people laugh.', okText:'🌿 悄悄穿越秘道！全隊 +1 ❤️！', ngText:'👺 被地精發現！全隊 -1 ❤️！' },
+      { id:'c', emoji:'💧', name:'汙水地道', nameEn:'Sewer Shortcut',   diff:'hard',   threshold:5, percent:33, hpOk:2,  hpNg:-2, desc:'A disgusting but fast shortcut under the fortress.', descZh:'噁心但快速的要塞地下水道捷徑。', challenge:"Create a secret password sentence to fool the goblin guards! Be creative!", format:'"The password is: [Make up a weird official-sounding sentence!]"', hint:'例：The password is: "The purple moon sings at midnight and the dragon drinks orange juice!" （越奇怪越好！）', okText:'💧 成功穿越地道！全隊 +2 ❤️！', ngText:'💦 地道被地精堵住！全隊 -2 ❤️！' }
+    ],
+    script:`<strong>【旁白】</strong><br><em>Goblin war drums beat in the distance. The fortress walls loom overhead. The group must find a way through...</em><br><br><strong>【路徑說明】</strong><br>🚪 正門入口 (Easy 3+)：向地精提出交換條件<br>🌿 秘密小道 (Normal 4+)：用三個形容詞描述自己<br>💧 汙水地道 (Hard 5+)：創作一個讓地精信服的假密語`
+  },
+  { num:5, title:'龍之巔峰', titleEn:"The Dragon's Peak", emoji:'🐉', bg:'radial-gradient(ellipse at 50% 80%,#3a0a0a 0%,#0a0a0f 80%)',
+    lore:"You stand before the Dragon's lair. The final challenge awaits. Three paths lead to the ultimate treasure...",
+    loreZh:'你們站在巨龍的巢穴前。最終的考驗即將來臨。三條路通往終極寶藏...',
+    paths:[
+      { id:'a', emoji:'🌀', name:'螺旋石階', nameEn:'Spiral Stairway', diff:'easy',   threshold:3, percent:67, hpOk:0,  hpNg:-1, desc:'A grand staircase leading up to the dragon. Dramatic entrance.', descZh:'通往巨龍的宏偉石造螺旋樓梯。充滿戲劇性的入場。', challenge:'Tell the dragon ONE thing you love and ONE thing you fear — and why!', format:'"Mighty Dragon! I love ___ because ___. I fear ___ because ___."', hint:'例：Mighty Dragon! I love music because it makes me happy. I fear failure because I want to do my best.', okText:'🌀 龍被你的誠實所感動！隊伍安全通過！', ngText:'🔥 龍噴出火焰！全隊 -1 ❤️！' },
+      { id:'b', emoji:'🌉', name:'天空吊橋', nameEn:'Sky Bridge',       diff:'normal', threshold:4, percent:50, hpOk:1,  hpNg:-1, desc:'A terrifying bridge of clouds above the lava.', descZh:'橫跨熔岩上方的雲霧吊橋。驚險刺激。', challenge:'Make a speech to convince the dragon to let you pass!', format:'"Great Dragon! Please let us pass because ___. We promise ___. In return, we will ___!"', hint:'例：Great Dragon! Please let us pass because we are on an important quest. We promise to respect your treasure. In return, we will spread the story of your greatness!', okText:'🌉 龍被你的演講說服！全隊 +1 ❤️！', ngText:'💀 龍不相信你！全隊 -1 ❤️！' },
+      { id:'c', emoji:'🌋', name:'熔岩隧道', nameEn:'Lava Tunnel',      diff:'hard',   threshold:5, percent:33, hpOk:2,  hpNg:-2, desc:'A burning tunnel through active lava flows. Extremely dangerous!', descZh:'穿越活躍熔岩流的燃燒隧道。極度危險！', challenge:"Tell the dragon your greatest achievement in life — impress it!", format:'"Dragon! My greatest achievement is ___! I am proud because ___. It proves that I ___!"', hint:'例：Dragon! My greatest achievement is learning to swim! I am proud because I was afraid of water. It proves that I can overcome my fears!', okText:'🌋 龍佩服你的成就！全隊 +2 ❤️！', ngText:'🔥 熔岩淹沒通道！全隊 -2 ❤️！' }
+    ],
+    script:`<strong>【旁白】</strong><br><em>The ground trembles. A massive red dragon opens one enormous eye and stares at the group...</em><br><br><strong>【路徑說明】</strong><br>🌀 螺旋石階 (Easy 3+)：告訴龍一件你愛的事和一件你怕的事<br>🌉 天空吊橋 (Normal 4+)：向龍發表說服演說<br>🌋 熔岩隧道 (Hard 5+)：告訴龍你人生最大的成就`
+  }
+];
+
+const ICONS = ['⚔️','🧙','👁️','🏹','🛡️'];
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let players = [], currentLevel = 0, selectedPath = null;
+let phase = 'choosing'; // choosing | challenge | rolling | result
+let doublediceActive = false, eliminatedPathId = null, oraclePath = null, oracleResult = null;
+let transitioning = false, hostOpen = true;
+
+// ── SETUP ────────────────────────────────────────────────────────────────────
+function addPlayer() {
+  const list = document.getElementById('player-list');
+  if (list.querySelectorAll('.player-row').length >= 5) return;
+  const i = list.querySelectorAll('.player-row').length;
+  const row = document.createElement('div');
+  row.className = 'player-row';
+  row.innerHTML = `<span class="player-icon">${ICONS[i]}</span>
+    <input type="text" placeholder="玩家 ${i+1} 姓名">
+    <div class="cls-group">
+      <button class="cls-btn active" data-cls="warrior" onclick="pickClass(this)">⚔️</button>
+      <button class="cls-btn" data-cls="mage" onclick="pickClass(this)">🧙</button>
+      <button class="cls-btn" data-cls="seer" onclick="pickClass(this)">👁️</button>
+    </div>
+    <button class="btn-rm" onclick="rmPlayer(this)">✕</button>`;
+  list.appendChild(row);
+}
+function rmPlayer(btn) {
+  const list = document.getElementById('player-list');
+  if (list.querySelectorAll('.player-row').length <= 1) return;
+  btn.closest('.player-row').remove();
+}
+function pickClass(btn) {
+  btn.closest('.cls-group').querySelectorAll('.cls-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.player-row').querySelector('.player-icon').textContent = CLASSES[btn.dataset.cls]?.emoji || '?';
+}
+function startGame() {
+  players = Array.from(document.querySelectorAll('#player-list .player-row')).map((row, i) => {
+    const name = row.querySelector('input').value.trim() || `玩家 ${i+1}`;
+    const clsKey = row.querySelector('.cls-btn.active')?.dataset.cls || 'warrior';
+    return { name, clsKey, cls: CLASSES[clsKey], icon: CLASSES[clsKey].emoji, hp: 5, maxHp: 5, skillUsed: false };
+  });
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'flex';
+  buildHpBar(); buildHpCtrls(); buildSkillRows(); buildLevelDots();
+  loadLevel(0);
+}
+
+// ── HP ───────────────────────────────────────────────────────────────────────
+function buildHpBar() {
+  document.getElementById('hp-bar').innerHTML = players.map((p, i) => `
+    <div class="p-hp">
+      <div class="p-hp-name">${p.icon} ${p.name}</div>
+      <div class="p-hp-hearts" id="h${i}"></div>
+      <div class="p-hp-class" style="background:${p.cls.color}22;color:${p.cls.color}">${p.cls.name}</div>
+    </div>`).join('');
+  renderHp();
+}
+function renderHp() {
+  players.forEach((p, i) => {
+    const el = document.getElementById(`h${i}`);
+    if (el) el.innerHTML = Array.from({length: p.maxHp}, (_, h) => `<span>${h < p.hp ? '❤️' : '🖤'}</span>`).join('');
+  });
+  if (players.length && players.every(p => p.hp <= 0)) showGameOver();
+}
+function changeHp(i, d) { players[i].hp = Math.max(0, Math.min(players[i].maxHp, players[i].hp + d)); renderHp(); }
+function applyHpAll(delta) { if (!delta) return; players.forEach((_, i) => changeHp(i, delta)); }
+function buildHpCtrls() {
+  document.getElementById('hp-ctrls').innerHTML = players.map((p, i) => `
+    <div class="hp-ctrl">
+      <span class="hp-ctrl-name">${p.icon} ${p.name}</span>
+      <button class="hp-cbtn hp-minus" onclick="changeHp(${i},-1)">−</button>
+      <button class="hp-cbtn hp-plus"  onclick="changeHp(${i},+1)">+</button>
+    </div>`).join('');
+}
+
+// ── LEVEL RENDERING ──────────────────────────────────────────────────────────
+function buildLevelDots() {
+  document.getElementById('level-dots').innerHTML = LEVELS.map((_, i) => `<div class="lvl-dot" id="ld${i}"></div>`).join('');
+}
+function updateDots() {
+  LEVELS.forEach((_, i) => {
+    const d = document.getElementById(`ld${i}`);
+    if (d) d.className = 'lvl-dot' + (i === currentLevel ? ' active' : i < currentLevel ? ' done' : '');
+  });
+}
+
+function loadLevel(idx) {
+  currentLevel = idx;
+  selectedPath = null;
+  phase = 'choosing';
+  doublediceActive = false;
+  eliminatedPathId = null;
+  oraclePath = null;
+  oracleResult = null;
+  const lv = LEVELS[idx];
+  document.getElementById('scene-area').style.background = lv.bg;
+  document.getElementById('lv-emoji').textContent = lv.emoji;
+  document.getElementById('lv-title').textContent = `${lv.title}`;
+  document.getElementById('lv-lore').textContent = lv.lore;
+  document.getElementById('script-body').innerHTML = lv.script;
+  document.getElementById('level-phase').textContent = '🗺️ 選擇路徑';
+  document.getElementById('challenge-section').classList.remove('open');
+  document.getElementById('dice-section').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('dice-row').innerHTML = '';
+  updateDots();
+  renderPaths();
+  refreshSkillRows();
+}
+
+function renderPaths() {
+  const lv = LEVELS[currentLevel];
+  document.getElementById('paths-grid').innerHTML = lv.paths.map(p => {
+    const diffLabel = p.diff === 'easy' ? '🟢 Easy · 3+' : p.diff === 'normal' ? '🟡 Normal · 4+' : '🔴 Hard · 5+';
+    const isElim = p.id === eliminatedPathId;
+    return `<div class="path-card${isElim ? ' blocked' : ''}" id="pc-${p.id}" onclick="selectPath('${p.id}')">
+      <div class="oracle-badge" id="ob-${p.id}"></div>
+      <div class="path-percent-badge" id="pp-${p.id}">--</div>
+      <div class="path-emoji">${p.emoji}</div>
+      <div class="path-name">${p.name}</div>
+      <div class="path-name-en">${p.nameEn}</div>
+      <div class="diff-badge diff-${p.diff}">${diffLabel}</div>
+      <div class="path-desc">${p.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectPath(pid) {
+  if (phase !== 'choosing') return;
+  const lv = LEVELS[currentLevel];
+  selectedPath = lv.paths.find(p => p.id === pid);
+  if (!selectedPath || pid === eliminatedPathId) return;
+  document.querySelectorAll('.path-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById(`pc-${pid}`).classList.add('selected');
+  document.getElementById('ch-text').textContent = selectedPath.challenge;
+  document.getElementById('ch-format').textContent = selectedPath.format;
+  document.getElementById('ch-hint').textContent = selectedPath.hint;
+  document.getElementById('challenge-section').classList.add('open');
+  document.getElementById('dice-section').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
+  phase = 'challenge';
+  document.getElementById('level-phase').textContent = '🎯 英語挑戰';
+}
+
+function hostShowChallenge() {
+  if (!selectedPath) return;
+  document.getElementById('dice-section').style.display = 'block';
+  phase = 'rolling';
+  document.getElementById('level-phase').textContent = '🎲 骰骰子';
+}
+
+function hostShowDice() { hostShowChallenge(); }
+
+// ── DICE ─────────────────────────────────────────────────────────────────────
+function rollDice() {
+  if (phase !== 'rolling' || !selectedPath) return;
+  phase = 'result';
+  const count = doublediceActive ? 2 : 1;
+  let results, best;
+
+  // If oracle predicted this path, use that result
+  if (oraclePath === selectedPath.id && oracleResult !== null) {
+    const threshold = selectedPath.threshold;
+    // Generate a dice that matches the oracle prediction
+    let roll;
+    if (oracleResult === 'success') {
+      const pool = [4,5,6].filter(r => r >= threshold);
+      roll = pool.length ? pool[Math.floor(Math.random() * pool.length)] : threshold;
+    } else {
+      const pool = [1,2,3].filter(r => r < threshold);
+      roll = pool.length ? pool[Math.floor(Math.random() * pool.length)] : threshold - 1;
+    }
+    results = [roll];
+    best = roll;
+  } else {
+    results = Array.from({length: count}, () => Math.ceil(Math.random() * 6));
+    best = Math.max(...results);
+  }
+
+  const row = document.getElementById('dice-row');
+  row.innerHTML = results.map(() => `<div class="dface rolling">🎲</div>`).join('');
+  setTimeout(() => {
+    row.innerHTML = results.map(r => `<div class="dface">${DICE_FACES[r-1]}<br><small style="font-size:.45rem;color:var(--muted)">${r}</small></div>`).join('');
+    setTimeout(() => showResult(best), 300);
+  }, 550);
+}
+
+function showResult(val) {
+  const path = selectedPath;
+  const ok = val >= path.threshold;
+  const hp = ok ? path.hpOk : path.hpNg;
+  applyHpAll(hp);
+  const resEl = document.getElementById('result-section');
+  document.getElementById('res-icon').textContent = ok ? '✅' : '❌';
+  const rtEl = document.getElementById('res-text');
+  rtEl.innerHTML = (ok ? path.okText : path.ngText) + (hp ? `<br><span style="font-size:.85rem;color:var(--muted)">骰出 ${val} — 門檻 ${path.threshold}</span>` : `<br><span style="font-size:.85rem;color:var(--muted)">骰出 ${val} — 門檻 ${path.threshold}</span>`);
+  rtEl.className = `result-text ${ok ? 'result-ok' : 'result-ng'}`;
+  const isLast = currentLevel === LEVELS.length - 1;
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = isLast ? '🏆 完成冒險！' : '繼續冒險 ▶';
+  nextBtn.onclick = isLast ? showVictory : nextLevel;
+  resEl.style.display = 'block';
+  document.getElementById('level-phase').textContent = ok ? '✅ 成功！' : '❌ 失敗...';
+}
+
+function nextLevel() {
+  if (currentLevel >= LEVELS.length - 1) { showVictory(); return; }
+  transitionToLevel(currentLevel + 1);
+}
+
+// ── SKILLS ───────────────────────────────────────────────────────────────────
+function buildSkillRows() { refreshSkillRows(); }
+function refreshSkillRows() {
+  document.getElementById('skill-rows').innerHTML = players.map((p, i) => `
+    <div class="skill-row">
+      <span class="skill-who">${p.icon} ${p.name}</span>
+      <button class="skill-btn" style="background:${p.cls.color};color:#fff"
+        onclick="useSkill(${i})" ${p.skillUsed ? 'disabled' : ''}>${p.skillUsed ? '✓ 已使用' : p.cls.emoji + ' ' + p.clsKey.toUpperCase()}
+      </button>
+    </div>`).join('');
+}
+
+function useSkill(pIdx) {
+  const p = players[pIdx];
+  if (p.skillUsed) return;
+  // Skill overlay animation
+  const ov = document.getElementById('skill-overlay');
+  ov.style.background = p.cls.gradient;
+  ov.style.opacity = '1'; ov.style.transition = '';
+  document.getElementById('skill-player-name').textContent = p.name.toUpperCase() + ' 使用技能！';
+  document.getElementById('skill-big-emoji').textContent = p.cls.emoji;
+  document.getElementById('skill-name').textContent = p.cls.skill;
+  document.getElementById('skill-name').style.color = p.cls.color;
+  document.getElementById('skill-name-zh').textContent = p.cls.skillZh;
+  document.getElementById('skill-effect').textContent = p.cls.effect;
+  spawnParticles(p.cls.particle);
+  ov.style.display = 'flex';
+  p.skillUsed = true;
+  refreshSkillRows();
+  // Execute skill effect after overlay
+  setTimeout(() => {
+    ov.style.transition = 'opacity .6s ease'; ov.style.opacity = '0';
+    setTimeout(() => { ov.style.display = 'none'; ov.style.opacity = '1'; ov.style.transition = ''; document.getElementById('skill-particles').innerHTML = ''; }, 650);
+    if (p.clsKey === 'warrior') applyEliminate();
+    else if (p.clsKey === 'mage') applyReveal();
+    else if (p.clsKey === 'seer') showOraclePicker();
+  }, 2600);
+}
+
+function applyEliminate() {
+  // Eliminate the hardest path
+  const lv = LEVELS[currentLevel];
+  const hard = lv.paths.find(p => p.diff === 'hard') || lv.paths[lv.paths.length - 1];
+  eliminatedPathId = hard.id;
+  const card = document.getElementById(`pc-${hard.id}`);
+  if (card) card.classList.add('blocked');
+  if (selectedPath?.id === hard.id) { selectedPath = null; document.getElementById('challenge-section').classList.remove('open'); phase = 'choosing'; }
+}
+
+function applyReveal() {
+  LEVELS[currentLevel].paths.forEach(p => {
+    const badge = document.getElementById(`pp-${p.id}`);
+    const card = document.getElementById(`pc-${p.id}`);
+    if (badge && card) {
+      card.classList.add('revealed');
+      badge.textContent = '0%';
+      let cur = 0;
+      const tick = () => { cur = Math.min(cur + 2, p.percent); badge.textContent = cur + '%'; if (cur < p.percent) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    }
+  });
+}
+
+function showOraclePicker() {
+  // Show oracle overlay with path buttons to pick from
+  document.getElementById('oracle-path-name').textContent = '選擇要窺探的路徑：';
+  document.getElementById('oracle-path-en').textContent = 'Pick one path to see its fate.';
+  document.getElementById('oracle-result-icon').innerHTML = LEVELS[currentLevel].paths.map(p =>
+    `<button class="action-btn btn-outline" style="margin:4px;font-size:.85rem" onclick="peekPath('${p.id}')">${p.emoji} ${p.name}</button>`
+  ).join('');
+  document.getElementById('oracle-result-text').textContent = '';
+  document.getElementById('oracle-overlay').querySelector('.action-btn.btn-gold').style.display = 'none';
+  document.getElementById('oracle-overlay').style.display = 'flex';
+}
+
+function peekPath(pid) {
+  const lv = LEVELS[currentLevel];
+  const path = lv.paths.find(p => p.id === pid);
+  if (!path) return;
+  const r = Math.ceil(Math.random() * 6);
+  const ok = r >= path.threshold;
+  oraclePath = pid;
+  oracleResult = ok ? 'success' : 'fail';
+  document.getElementById('oracle-path-name').textContent = path.emoji + ' ' + path.name;
+  document.getElementById('oracle-path-en').textContent = path.nameEn;
+  document.getElementById('oracle-result-icon').innerHTML = ok ? '✅' : '❌';
+  document.getElementById('oracle-result-text').innerHTML = ok
+    ? `<span style="color:var(--green)">命運顯示：這條路將會成功！<br><small style="color:var(--muted)">The path is safe — if you choose it, you will succeed.</small></span>`
+    : `<span style="color:var(--red)">命運顯示：這條路將會失敗！<br><small style="color:var(--muted)">The path is cursed — choosing it leads to failure.</small></span>`;
+  // Mark the card
+  const badge = document.getElementById(`ob-${pid}`);
+  if (badge) { badge.textContent = ok ? '👁 成功' : '👁 失敗'; badge.className = `oracle-badge ${ok ? 'oracle-ok' : 'oracle-bad'}`; badge.style.display = 'block'; }
+  document.getElementById('oracle-overlay').querySelector('.action-btn.btn-gold').style.display = '';
+}
+
+function closeOracle() { document.getElementById('oracle-overlay').style.display = 'none'; }
+
+function spawnParticles(emoji) {
+  const container = document.getElementById('skill-particles');
+  container.innerHTML = '';
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement('span');
+    p.className = 'particle'; p.textContent = emoji;
+    p.style.left = Math.random() * 100 + '%'; p.style.bottom = '-30px';
+    p.style.fontSize = (16 + Math.random() * 20) + 'px';
+    p.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    p.style.animationDelay = Math.random() * 1.2 + 's';
+    container.appendChild(p);
+  }
+}
+
+// ── TRANSITION ───────────────────────────────────────────────────────────────
+function transitionToLevel(idx) {
+  if (transitioning) return;
+  transitioning = true;
+  const lv = LEVELS[idx];
+  const ov = document.getElementById('transition-overlay');
+  const card = document.getElementById('trans-card');
+  document.getElementById('trans-emoji').textContent = lv.emoji;
+  document.getElementById('trans-label').textContent = `第 ${lv.num} 關 / ${LEVELS.length}`;
+  document.getElementById('trans-title').textContent = lv.title;
+  card.classList.remove('visible');
+  ov.style.opacity = '0'; ov.style.transition = ''; ov.style.display = 'flex';
+  setTimeout(() => { ov.style.transition = 'opacity .45s ease'; ov.style.opacity = '1'; }, 20);
+  setTimeout(() => card.classList.add('visible'), 520);
+  setTimeout(() => loadLevel(idx), 950);
+  setTimeout(() => card.classList.remove('visible'), 1850);
+  setTimeout(() => { ov.style.opacity = '0'; }, 2150);
+  setTimeout(() => { ov.style.display = 'none'; ov.style.transition = ''; transitioning = false; }, 2650);
+}
+
+// ── HOST & END ────────────────────────────────────────────────────────────────
+function toggleHost() {
+  hostOpen = !hostOpen;
+  document.getElementById('host-body').style.display = hostOpen ? 'grid' : 'none';
+  document.getElementById('host-icon').textContent = hostOpen ? '▲' : '▼';
+}
+function showVictory()  { document.getElementById('victory-screen').style.display = 'flex'; }
+function showGameOver() { document.getElementById('gameover-screen').style.display = 'flex'; }
+function resetGame() {
+  ['victory-screen','gameover-screen'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  transitioning = false;
+}
+</script>
+</body>
+</html>
