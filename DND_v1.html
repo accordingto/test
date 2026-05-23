@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英語勇者團 ⚔️</title>
+  <style>
+    :root {
+      --bg: #0d0d1a; --surface: #16162a; --card: #1e1e35;
+      --gold: #d4a843; --gold-l: #f0c96a;
+      --red: #c0392b; --green: #27ae60; --blue: #3d5fe0; --purple: #8e44ad;
+      --text: #e8dfc8; --muted: #7a7a9a; --border: #2e2e50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* ── SETUP ── */
+    #setup-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; background: radial-gradient(ellipse at center, #1a0a3a 0%, #0d0d1a 70%); }
+    .setup-title { font-size: 2.8rem; color: var(--gold); text-shadow: 0 0 30px rgba(212,168,67,.5); margin-bottom: 6px; text-align: center; }
+    .setup-sub { color: var(--muted); margin-bottom: 36px; text-align: center; font-size: .95rem; }
+    .setup-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 520px; }
+    .setup-card h2 { color: var(--gold); font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 14px; }
+    .player-row { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+    .player-icon { font-size: 1.3rem; width: 30px; text-align: center; flex-shrink: 0; }
+    .player-row input { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: .9rem; outline: none; transition: border-color .2s; }
+    .player-row input:focus { border-color: var(--gold); }
+    .player-row input::placeholder { color: var(--muted); }
+    .cls-group { display: flex; gap: 3px; flex-shrink: 0; }
+    .cls-btn { width: 28px; height: 28px; border-radius: 6px; border: 2px solid var(--border); background: transparent; cursor: pointer; font-size: .95rem; transition: all .15s; display: flex; align-items: center; justify-content: center; padding: 0; }
+    .cls-btn:hover { border-color: var(--muted); }
+    .cls-btn.active { border-color: var(--gold); background: rgba(212,168,67,.2); }
+    .btn-rm { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--border); color: var(--muted); cursor: pointer; font-size: .8rem; flex-shrink: 0; }
+    .btn-rm:hover { background: var(--red); color: #fff; }
+    .btn-add-player { width: 100%; padding: 8px; margin-top: 6px; background: transparent; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; font-size: .85rem; }
+    .btn-add-player:hover { border-color: var(--gold); color: var(--gold); }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .diff-row { display: flex; gap: 8px; margin-bottom: 22px; }
+    .diff-btn { flex: 1; padding: 10px 6px; border: 2px solid var(--border); border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; font-size: .78rem; line-height: 1.4; transition: all .2s; }
+    .diff-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212,168,67,.1); }
+    .btn-start { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold), #c8962a); color: #000; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: opacity .2s, transform .1s; letter-spacing: .05em; }
+    .btn-start:hover { opacity: .9; }
+    .btn-start:active { transform: scale(.98); }
+
+    /* ── GAME SCREEN ── */
+    #game-screen { display: none; flex-direction: column; min-height: 100vh; }
+    #hp-bar { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .p-hp { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .p-hp-name { font-size: .7rem; color: var(--muted); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .p-hp-hearts { display: flex; gap: 2px; font-size: .95rem; }
+    .p-hp-class { font-size: .58rem; text-transform: uppercase; letter-spacing: .1em; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+    .scene-dots { display: flex; justify-content: center; gap: 6px; padding: 8px 0; background: var(--surface); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all .3s; }
+    .dot.active { background: var(--gold); width: 20px; border-radius: 4px; }
+    .dot.done { background: var(--muted); }
+    #scene-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 20px 20px; transition: background 1s ease; min-height: 400px; }
+    .s-emoji { font-size: 5rem; margin-bottom: 14px; filter: drop-shadow(0 0 20px rgba(255,255,255,.25)); animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .s-phase { font-size: .7rem; text-transform: uppercase; letter-spacing: .2em; color: var(--gold); margin-bottom: 6px; }
+    .s-title { font-size: 2rem; font-weight: 700; color: #fff; text-align: center; margin-bottom: 4px; }
+    .s-subtitle { font-size: .9rem; color: var(--muted); font-style: italic; margin-bottom: 22px; text-align: center; }
+    .challenge-box { background: rgba(212,168,67,.08); border: 2px solid var(--gold); border-radius: 12px; padding: 18px 22px; max-width: 580px; width: 100%; text-align: center; }
+    .challenge-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); margin-bottom: 8px; }
+    .challenge-text { font-size: 1.1rem; color: #fff; line-height: 1.65; font-weight: 500; }
+    .challenge-format { font-size: .85rem; color: var(--muted); margin-top: 10px; font-style: italic; }
+    #dice-display { margin-top: 20px; text-align: center; display: none; animation: popIn .3s ease; }
+    @keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+    .dice-lbl { font-size: .75rem; color: var(--muted); }
+    .dice-val { font-size: 3.5rem; }
+    .dice-verdict { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+    .ok { color: var(--green); } .ng { color: var(--red); }
+
+    /* ── HOST PANEL ── */
+    #host-panel { background: var(--surface); border-top: 2px solid var(--gold); }
+    #host-toggle { width: 100%; padding: 10px 20px; background: transparent; border: none; color: var(--gold); cursor: pointer; font-size: .8rem; font-weight: 600; text-align: center; text-transform: uppercase; letter-spacing: .1em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    #host-body { padding: 16px 20px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 900px; margin: 0 auto; }
+    .h-section { background: var(--card); border-radius: 10px; padding: 14px; }
+    .h-section h3 { font-size: .65rem; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); margin-bottom: 10px; }
+    .h-section.full { grid-column: span 2; }
+    .script-body { font-size: .82rem; line-height: 1.7; color: var(--text); }
+    .script-body strong { color: var(--gold-l); }
+    .script-body em { color: #aaa; font-style: italic; }
+    .ctrl-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .hbtn { flex: 1; padding: 10px 6px; border: none; border-radius: 8px; cursor: pointer; font-size: .8rem; font-weight: 600; transition: opacity .15s, transform .1s; }
+    .hbtn:hover { opacity: .85; } .hbtn:active { transform: scale(.97); }
+    .hbtn-gold { background: var(--gold); color: #000; }
+    .hbtn-blue { background: var(--blue); color: #fff; }
+    .hbtn-purple { background: var(--purple); color: #fff; }
+    .hbtn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .hbtn:disabled { opacity: .3; cursor: not-allowed; }
+    .dice-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    #dice-faces { display: flex; gap: 8px; min-height: 56px; align-items: center; justify-content: center; }
+    .dface { width: 52px; height: 52px; background: var(--surface); border: 2px solid var(--gold); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--gold); font-weight: 700; }
+    .dface.rolling { animation: shake .45s ease; }
+    @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-18deg) scale(1.1)} 75%{transform:rotate(18deg) scale(1.1)} }
+    .hp-ctrls { display: flex; flex-wrap: wrap; gap: 8px; }
+    .hp-ctrl { display: flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 8px; padding: 6px 10px; }
+    .hp-ctrl-name { font-size: .78rem; min-width: 48px; }
+    .hp-cbtn { width: 24px; height: 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: .9rem; }
+    .hp-plus { background: var(--green); color: #fff; } .hp-minus { background: var(--red); color: #fff; }
+    .skill-sel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: .82rem; outline: none; width: 100%; margin-bottom: 8px; }
+
+    /* ── TRANSITION OVERLAY ── */
+    #transition-overlay { position: fixed; inset: 0; z-index: 200; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+    #trans-card { text-align: center; opacity: 0; transform: scale(.85); transition: opacity .4s ease, transform .4s ease; }
+    #trans-card.visible { opacity: 1; transform: scale(1); }
+    #trans-emoji { font-size: 4.5rem; margin-bottom: 14px; }
+    #trans-phase { font-size: .7rem; text-transform: uppercase; letter-spacing: .25em; color: var(--gold); margin-bottom: 10px; }
+    #trans-divider { height: 1px; width: 60px; background: var(--gold); margin: 0 auto 14px; }
+    #trans-title { font-size: 2.4rem; font-weight: 700; color: #fff; }
+    #trans-sub { font-size: .95rem; color: var(--muted); margin-top: 8px; font-style: italic; }
+
+    /* ── ENCOUNTER OVERLAY ── */
+    #encounter-overlay { position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,.88); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #encounter-overlay.show { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    #enc-card { background: var(--card); border: 2px solid var(--gold); border-radius: 18px; padding: 28px 22px; max-width: 460px; width: 100%; text-align: center; animation: slideUp .35s ease; }
+    @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+    #enc-badge { display: inline-block; background: var(--gold); color: #000; font-size: .65rem; font-weight: 700; letter-spacing: .18em; padding: 3px 12px; border-radius: 20px; margin-bottom: 12px; text-transform: uppercase; }
+    #enc-emoji { font-size: 3.2rem; margin-bottom: 10px; }
+    #enc-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    #enc-prompt { font-size: .88rem; color: var(--muted); margin-bottom: 18px; line-height: 1.55; }
+    .enc-opt { width: 100%; margin: 6px 0; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+    .enc-opt:hover { border-color: var(--gold); background: rgba(212,168,67,.1); }
+    .enc-opt-label { font-size: .88rem; font-weight: 600; }
+    .enc-opt-phrase { font-size: .76rem; color: var(--gold-l); margin-top: 3px; font-style: italic; }
+    #enc-dice { display: none; margin: 14px 0; }
+    #enc-dice-hint { font-size: .82rem; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+    #enc-dice-faces { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; min-height: 52px; }
+    #enc-result { display: none; }
+    #enc-result-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    #enc-result-text { font-size: .95rem; color: var(--text); line-height: 1.55; margin-bottom: 18px; }
+    .enc-close-btn { padding: 10px 28px; background: var(--gold); color: #000; border: none; border-radius: 8px; font-weight: 700; font-size: .9rem; cursor: pointer; }
+    .enc-close-btn:hover { opacity: .85; }
+
+    /* ── SKILL OVERLAY ── */
+    #skill-overlay { position: fixed; inset: 0; z-index: 180; display: none; align-items: center; justify-content: center; overflow: hidden; }
+    #skill-particles { position: absolute; inset: 0; pointer-events: none; }
+    .particle { position: absolute; animation: particleRise linear forwards; pointer-events: none; }
+    @keyframes particleRise { 0%{transform:translateY(0) rotate(0deg) scale(1);opacity:.9} 100%{transform:translateY(-110vh) rotate(720deg) scale(.2);opacity:0} }
+    #skill-inner { position: relative; z-index: 1; text-align: center; padding: 20px; }
+    #skill-player-name { font-size: .8rem; letter-spacing: .2em; color: rgba(255,255,255,.6); text-transform: uppercase; margin-bottom: 14px; }
+    #skill-big-emoji { font-size: 5rem; margin-bottom: 16px; animation: float 1s ease-in-out infinite; }
+    #skill-name { font-size: 3rem; font-weight: 900; letter-spacing: .06em; animation: skillPulse .5s ease-in-out infinite alternate; }
+    @keyframes skillPulse { from{transform:scale(1);filter:brightness(1)} to{transform:scale(1.05);filter:brightness(1.4)} }
+    #skill-name-zh { font-size: 1.3rem; color: rgba(255,255,255,.8); margin-top: 8px; }
+    #skill-effect { font-size: .92rem; color: rgba(255,255,255,.6); margin-top: 12px; font-style: italic; max-width: 320px; line-height: 1.5; }
+
+    /* ── END SCREENS ── */
+    .end-screen { position: fixed; inset: 0; background: rgba(0,0,0,.92); flex-direction: column; align-items: center; justify-content: center; z-index: 100; display: none; padding: 20px; text-align: center; }
+    .end-emoji { font-size: 6rem; margin-bottom: 18px; }
+    .end-title { font-size: 2.8rem; font-weight: 700; margin-bottom: 10px; }
+    .end-sub { font-size: 1rem; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+
+    @media (max-width: 580px) {
+      .setup-title { font-size: 2rem; }
+      .s-emoji { font-size: 3.5rem; }
+      .s-title { font-size: 1.5rem; }
+      #host-body { grid-template-columns: 1fr; }
+      .h-section.full { grid-column: span 1; }
+      #skill-name { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div id="setup-screen">
+  <div class="setup-title">⚔️ 英語勇者團</div>
+  <div class="setup-sub">English Quest Adventure — 開口說英語，一起闖關！</div>
+  <div class="setup-card">
+    <h2>👥 玩家設定（最多 6 人）</h2>
+    <div id="player-list">
+      <div class="player-row">
+        <span class="player-icon">⚔️</span>
+        <input type="text" placeholder="玩家 1 姓名">
+        <div class="cls-group">
+          <button class="cls-btn active" data-cls="warrior" onclick="pickClass(this)" title="Warrior">⚔️</button>
+          <button class="cls-btn" data-cls="mage" onclick="pickClass(this)" title="Mage">🧙</button>
+          <button class="cls-btn" data-cls="rogue" onclick="pickClass(this)" title="Rogue">🗡️</button>
+        </div>
+        <button class="btn-rm" onclick="rmPlayer(this)">✕</button>
+      </div>
+      <div class="player-row">
+        <span class="player-icon">🧙</span>
+        <input type="text" placeholder="玩家 2 姓名">
+        <div class="cls-group">
+          <button class="cls-btn" data-cls="warrior" onclick="pickClass(this)" title="Warrior">⚔️</button>
+          <button class="cls-btn active" data-cls="mage" onclick="pickClass(this)" title="Mage">🧙</button>
+          <button class="cls-btn" data-cls="rogue" onclick="pickClass(this)" title="Rogue">🗡️</button>
+        </div>
+        <button class="btn-rm" onclick="rmPlayer(this)">✕</button>
+      </div>
+    </div>
+    <button class="btn-add-player" onclick="addPlayer()">＋ 新增玩家</button>
+    <div class="divider"></div>
+    <h2>⚡ 難易度</h2>
+    <div class="diff-row">
+      <button class="diff-btn active" onclick="setDiff(this)">🌱 簡單<br><small>完整句骰1顆</small></button>
+      <button class="diff-btn" onclick="setDiff(this)">⚔️ 普通<br><small>完整句骰2顆</small></button>
+      <button class="diff-btn" onclick="setDiff(this)">💀 困難<br><small>需5+才算成功</small></button>
+    </div>
+    <button class="btn-start" onclick="startGame()">🗡️ 開始冒險！</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="game-screen">
+  <div id="hp-bar"></div>
+  <div class="scene-dots" id="scene-dots"></div>
+  <div id="scene-area">
+    <div class="s-emoji" id="s-emoji">⚔️</div>
+    <div class="s-phase" id="s-phase"></div>
+    <div class="s-title" id="s-title"></div>
+    <div class="s-subtitle" id="s-subtitle"></div>
+    <div class="challenge-box">
+      <div class="challenge-label">🎯 本關挑戰</div>
+      <div class="challenge-text" id="c-text"></div>
+      <div class="challenge-format" id="c-fmt"></div>
+    </div>
+    <div id="dice-display">
+      <div class="dice-lbl">骰子結果</div>
+      <div class="dice-val" id="d-val">🎲</div>
+      <div class="dice-verdict" id="d-verdict"></div>
+    </div>
+  </div>
+  <div id="host-panel">
+    <button id="host-toggle" onclick="toggleHost()"><span id="host-icon">▲</span> 主持人控制台</button>
+    <div id="host-body">
+      <div class="h-section full">
+        <h3>📜 旁白腳本</h3>
+        <div class="script-body" id="script-body"></div>
+      </div>
+      <div class="h-section">
+        <h3>🗺️ 場景控制</h3>
+        <div class="ctrl-row">
+          <button class="hbtn hbtn-outline" onclick="prevScene()">◀ 上一場景</button>
+          <button class="hbtn hbtn-gold" onclick="nextScene()">下一場景 ▶</button>
+        </div>
+        <div class="ctrl-row">
+          <button class="hbtn hbtn-outline" onclick="showVictory()">🏆 勝利</button>
+          <button class="hbtn hbtn-outline" onclick="showGameOver()">💀 Game Over</button>
+        </div>
+        <div id="enc-section" style="display:none;margin-top:12px">
+          <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:7px">⚡ 觸發遭遇事件</div>
+          <div id="enc-buttons"></div>
+        </div>
+      </div>
+      <div class="h-section">
+        <h3>🎲 骰子</h3>
+        <div class="dice-section">
+          <div class="ctrl-row" style="width:100%">
+            <button class="hbtn hbtn-blue" onclick="roll(1)">骰 1 顆</button>
+            <button class="hbtn hbtn-gold" onclick="roll(2)">骰 2 顆</button>
+          </div>
+          <div id="dice-faces"></div>
+        </div>
+      </div>
+      <div class="h-section">
+        <h3>✨ 技能發動</h3>
+        <select class="skill-sel" id="skill-player-sel"></select>
+        <div class="ctrl-row">
+          <button class="hbtn" style="background:#c0392b;color:#fff" onclick="triggerSkill('warrior')">⚔️ Last Stand</button>
+          <button class="hbtn" style="background:#8e44ad;color:#fff" onclick="triggerSkill('mage')">🧙 Arcane</button>
+          <button class="hbtn" style="background:#27ae60;color:#fff" onclick="triggerSkill('rogue')">🗡️ Shadow</button>
+        </div>
+      </div>
+      <div class="h-section full">
+        <h3>❤️ 血量管理</h3>
+        <div class="hp-ctrls" id="hp-ctrls"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRANSITION ══ -->
+<div id="transition-overlay">
+  <div id="trans-card">
+    <div id="trans-emoji"></div>
+    <div id="trans-phase"></div>
+    <div id="trans-divider"></div>
+    <div id="trans-title"></div>
+    <div id="trans-sub"></div>
+  </div>
+</div>
+
+<!-- ══ ENCOUNTER ══ -->
+<div id="encounter-overlay">
+  <div id="enc-card">
+    <div id="enc-badge">⚡ ENCOUNTER!</div>
+    <div id="enc-emoji"></div>
+    <div id="enc-title"></div>
+    <div id="enc-prompt"></div>
+    <div id="enc-options"></div>
+    <div id="enc-dice">
+      <div id="enc-dice-hint"></div>
+      <div id="enc-dice-faces"></div>
+      <button class="hbtn hbtn-gold" style="width:100%;max-width:180px" onclick="rollEncounterDice()">🎲 骰骰子！</button>
+    </div>
+    <div id="enc-result">
+      <div id="enc-result-icon"></div>
+      <div id="enc-result-text"></div>
+      <button class="enc-close-btn" onclick="closeEncounter()">繼續冒險 ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SKILL ══ -->
+<div id="skill-overlay">
+  <div id="skill-particles"></div>
+  <div id="skill-inner">
+    <div id="skill-player-name"></div>
+    <div id="skill-big-emoji"></div>
+    <div id="skill-name"></div>
+    <div id="skill-name-zh"></div>
+    <div id="skill-effect"></div>
+  </div>
+</div>
+
+<!-- ══ END SCREENS ══ -->
+<div class="end-screen" id="victory-screen">
+  <div class="end-emoji">🏆</div>
+  <div class="end-title" style="color:var(--gold)">勝利！Victory!</div>
+  <div class="end-sub">勇者們成功說服了巨龍，帶著寶藏凱旋而歸！<br><strong style="color:var(--gold-l)">Great job speaking English, heroes!</strong></div>
+  <button class="btn-start" style="max-width:240px" onclick="resetGame()">🔄 再玩一次</button>
+</div>
+<div class="end-screen" id="gameover-screen">
+  <div class="end-emoji">💀</div>
+  <div class="end-title" style="color:var(--red)">Game Over...</div>
+  <div class="end-sub">勇者們倒下了，但下次一定能成功！<br>Don't give up — try again!</div>
+  <button class="btn-start" style="max-width:240px" onclick="resetGame()">🔄 再試一次</button>
+</div>
+
+<script>
+const CLASSES = {
+  warrior: { name:'Warrior 勇士', emoji:'⚔️', skill:'BATTLE CRY!', skillZh:'戰吼！', color:'#c0392b', gradient:'radial-gradient(ellipse at center,#7b0000 0%,#2a0000 60%,#000 100%)', particle:'⚔️', effect:'重骰一次失敗的骰子！Warrior defies fate — reroll!' },
+  mage:    { name:'Mage 法師',    emoji:'🧙', skill:'ARCANE SURGE!', skillZh:'奧術爆發！', color:'#8e44ad', gradient:'radial-gradient(ellipse at center,#5b2082 0%,#1a0030 60%,#000 100%)', particle:'✨', effect:'主持人給予本關英語提示！Ancient magic reveals a hidden clue!' },
+  rogue:   { name:'Rogue 盜賊',  emoji:'🗡️', skill:'SHADOW STEP!', skillZh:'暗影突刺！', color:'#27ae60', gradient:'radial-gradient(ellipse at center,#004020 0%,#001a0a 60%,#000 100%)', particle:'🗡️', effect:'本玩家自動通過這次挑戰！The rogue vanishes and bypasses the challenge!' }
+};
+
+const SCENES = [
+  {
+    id:'intro', phase:'冒險開始', bg:'radial-gradient(ellipse at center,#1a0a3a 0%,#0a0a0f 70%)',
+    emoji:'🗡️🛡️', title:'勇者集合！', subtitle:'Choose Your Class & Speak Up!',
+    challenge:'Introduce yourself and choose your class!<br>說出你的職業和你為何踏上這趟冒險！',
+    format:'"My name is ___. I am a [Warrior/Mage/Rogue] and I am here to ___!"',
+    script:`<strong>【開場規則（用中文說）】</strong><br>
+➡ 每關必須用英語完成挑戰才能過關<br>
+➡ 完整英語句子 → 骰骰子（4-6成功 / 1-3失敗）<br>
+➡ 沉默或說中文 → 直接扣血 ❤️<br><br>
+<strong>【職業技能（每人每局一次）】</strong><br>
+⚔️ <strong>Warrior</strong>：戰吼！重骰一次失敗的骰子<br>
+🧙 <strong>Mage</strong>：奧術！獲得一個英語提示<br>
+🗡️ <strong>Rogue</strong>：暗影！自動通過當前挑戰<br><br>
+<strong>【開場挑戰】</strong><br>
+<em>"My name is ___. I am a [職業] and I am here to ___!"</em><br>
+💡 <em>"I am a Mage and I am here to find the dragon's gold!"</em>`,
+    encounters:[]
+  },
+  {
+    id:'level1', phase:'第一關', bg:'radial-gradient(ellipse at 50% 80%,#0a2a0d 0%,#0a0a0f 70%)',
+    emoji:'👺', title:'地精守衛的問題', subtitle:'The Goblin Gate',
+    challenge:'"STOP! Tell me your NAME and WHY you are here — or I\'ll eat you for dinner!"',
+    format:'"My name is ___ and I am here because ___!"',
+    script:`<strong>【旁白】</strong><br>
+<em>You walk into a dark mossy cave. Suddenly — BANG! A small goblin jumps out!</em><br><br>
+<strong>【地精台詞 🎭（搞笑語氣）】</strong><br>
+<em>"STOP! Nobody passes the Goblin Gate without answering my questions! Tell me your name and WHY you are here! Or I'll eat you for dinner! Mwahaha!"</em><br><br>
+<strong>【骰子規則】</strong><br>
+✅ 完整句子（名字＋原因）→ 骰2顆，取高分<br>
+⚠️ 只說其中一項 → 骰1顆<br>
+❌ 沉默/中文 → 失敗 -1 ❤️<br>
+4-6 成功 / 1-3 地精攻擊 -1 ❤️<br><br>
+<strong>【成功】</strong><em>"Hmm... I like you! Pass... this time! 👌"</em><br>
+<strong>【謎語加分】</strong>❓ <em>"What has a head and a tail but no body?"</em> 💡 A coin → +1 ❤️`,
+    encounters:[
+      { id:'e1a', emoji:'🧪', title:'神秘發光藥水！',
+        prompt:'A glowing blue potion sits on a rock nearby. The goblin watches nervously...',
+        options:[
+          { label:'Drink it now!', phrase:'"I will drink this potion. Here goes nothing!"', outcome:'dice', hpGood:1, hpBad:-1, flavorGood:'✅ 治療藥水！恢復 1 ❤️！', flavorBad:'💀 毒藥！失去 1 ❤️！' },
+          { label:'Save it for later', phrase:'"I will keep this potion in my bag for later."', outcome:'neutral', hpDelta:0, flavor:'聰明的選擇！備用藥水已保存（主持人記錄，可於後關使用）。' },
+          { label:'Leave it alone', phrase:'"We should not touch things that don\'t belong to us."', outcome:'neutral', hpDelta:0, flavor:'你們謹慎地離開，繼續前進。' }
+        ]
+      },
+      { id:'e1b', emoji:'🗝️', title:'石縫裡的鑰匙！',
+        prompt:'You notice a rusty key stuck in a crack in the cave wall...',
+        options:[
+          { label:'Examine it carefully', phrase:'"I found something! Let me look at this key more carefully."', outcome:'success', hpDelta:1, flavor:'✅ 古老的鑰匙！刻著神秘符號... 恢復 1 ❤️（主持人可在後關增加劇情）' },
+          { label:'Ignore it', phrase:'"It\'s probably just garbage. Let\'s keep moving!"', outcome:'neutral', hpDelta:0, flavor:'你們繼續前進。誰知道那把鑰匙通往哪裡...' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'level2', phase:'第二關', bg:'radial-gradient(ellipse at 50% 30%,#2a0d4a 0%,#0a0a0f 70%)',
+    emoji:'🦁📚', title:'獅身人面獸的謎題', subtitle:"The Sphinx's Riddle",
+    challenge:'"Solve my riddle: I have cities but no houses, mountains but no trees, water but no fish. What am I?"',
+    format:'"I think the answer is ___ because ___."',
+    script:`<strong>【旁白】</strong><br>
+<em>A grand magical library. Books float through the air. A Sphinx opens one golden eye...</em><br><br>
+<strong>【獅身人面獸台詞 🎭】</strong><br>
+<em>"Brave humans. Solve my riddle or face my wrath! I have cities, but no houses. Mountains, but no trees. Water, but no fish. Roads, but no cars. What... am I?"</em><br><br>
+<strong>【規則】</strong><br>
+• 30秒英語討論時間<br>
+• <em>"I think it's ___ because ___."</em><br>
+• 答錯 → 給提示，免費重試<br><br>
+💡 <strong>答案：A map（地圖）</strong><br>答對 → 全隊恢復 1 ❤️`,
+    encounters:[
+      { id:'e2a', emoji:'📖', title:'飄浮的古老典籍！',
+        prompt:'A book floats toward you and falls open to a strange glowing page...',
+        options:[
+          { label:'Read it carefully', phrase:'"May I read this book, please? I will be very careful."', outcome:'success', hpDelta:0, flavor:'📖 書上寫著謎語提示！「Cities without houses... think about something you can fold!」（主持人揭示）' },
+          { label:'Grab it quickly!', phrase:'"I\'ll grab that book before it flies away!"', outcome:'dice', hpGood:0, hpBad:-1, flavorGood:'📖 得到提示「It\'s something you can hold in your hands but covers the whole world!」', flavorBad:'💀 書是被詛咒的！失去 1 ❤️！' },
+          { label:'Push it away', phrase:'"I don\'t trust this magical book. Stay away from me!"', outcome:'fail', hpDelta:0, flavor:'😤 書飛向獅身人面獸！牠看起來不高興... 下次骰子主持人可追加難度。' }
+        ]
+      },
+      { id:'e2b', emoji:'🚪', title:'書架後的秘密通道！',
+        prompt:'You notice a hidden door behind a bookshelf. It might be a shortcut — or a trap...',
+        options:[
+          { label:'Explore the passage!', phrase:'"I want to explore this hidden passage! It could be important!"', outcome:'dice', hpGood:1, hpBad:-1, flavorGood:'✅ 捷徑！找到補給品，恢復 1 ❤️！', flavorBad:'💥 陷阱！失去 1 ❤️！' },
+          { label:'Stay and face the sphinx', phrase:'"This might be a trap. We should face the sphinx directly."', outcome:'success', hpDelta:1, flavor:'✅ 獅身人面獸注意到你們的勇氣，給予祝福 +1 ❤️！' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'level3', phase:'最終關卡', bg:'radial-gradient(ellipse at 50% 80%,#3a0a0a 0%,#0a0a0f 70%)',
+    emoji:'🐉', title:'巨龍的考驗', subtitle:"The Dragon's Challenge — Boss Fight!",
+    challenge:'"Tell me ONE thing you LOVE and ONE thing you FEAR — in English. ALL of you. Or I\'ll eat you!"',
+    format:'"I love ___ because ___. I am afraid of ___ because ___."',
+    script:`<strong>【旁白】</strong><br>
+<em>A MASSIVE cavern. Mountains of gold. A RED DRAGON slowly opens one enormous eye...</em><br><br>
+<strong>【龍的台詞 🐉🎭】</strong><br>
+<em>"Humans... I am BORED. Tell me: one thing you LOVE, one thing you FEAR. All of you. In English. Or I will have you for dinner. Your. Choice."</em><br><br>
+<strong>【Boss HP 系統】</strong><br>
+🐉 龍的 HP = 玩家人數<br>
+✅ 每位玩家說完整的 love＋fear → 龍 -1 HP<br>
+❌ 沒說完 → 龍噴火全隊 -2 ❤️<br>
+🎲 骰出 6 → 龍大受感動，全隊 +1 ❤️<br><br>
+<em>🏆 所有玩家完成 → 按「勝利」按鈕！</em>`,
+    encounters:[
+      { id:'e3a', emoji:'💬', title:'龍的賭注！',
+        prompt:'"I\'m bored. Make me LAUGH with an English joke — or face my wrath!"',
+        options:[
+          { label:'Accept! Tell a joke.', phrase:'"Why don\'t scientists trust atoms? Because they make up everything!"', outcome:'success', hpDelta:1, flavor:'🐉 龍大笑！「Ha! I like you, little human.」全隊恢復 1 ❤️！' },
+          { label:'Refuse boldly!', phrase:'"We are not your entertainers, Dragon! We are HEROES!"', outcome:'success', hpDelta:1, flavor:'🐉 龍沉默一秒...「Impressive. I respect courage.」全隊 +1 ❤️！' },
+          { label:'Stay silent', phrase:'(no response)', outcome:'fail', hpDelta:-1, flavor:'💥 龍不耐煩了！噴出一口火！全隊失去 1 ❤️！' }
+        ]
+      },
+      { id:'e3b', emoji:'💎', title:'閃光寶石的誘惑！',
+        prompt:'A giant glowing gem sits just within reach. The dragon\'s eye slowly shifts toward it...',
+        options:[
+          { label:'Grab it secretly!', phrase:'"That gem is mine! I will grab it while the dragon isn\'t looking!"', outcome:'dice', hpGood:1, hpBad:-2, flavorGood:'✅ 成功拿到！趁龍分心... +1 ❤️！', flavorBad:'💥 龍看見了！「THIEF!」全隊 -2 ❤️！' },
+          { label:'Leave it alone', phrase:'"We should focus on our mission. The gem can wait."', outcome:'success', hpDelta:0, flavor:'🐉 龍點頭：「Wise choice.」牠的態度稍微軟化了（主持人可降低最終挑戰難度）。' }
+        ]
+      }
+    ]
+  }
+];
+
+const ICONS = ['⚔️','🧙','🗡️','🏹','🛡️','🔮'];
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
+let players = [], scene = 0, hostOpen = true, transitioning = false, pendingDiceOpt = null;
+
+// ── SETUP ────────────────────────────────────────────────────────────────────
+function addPlayer() {
+  const list = document.getElementById('player-list');
+  const rows = list.querySelectorAll('.player-row');
+  if (rows.length >= 6) return;
+  const i = rows.length;
+  const row = document.createElement('div');
+  row.className = 'player-row';
+  row.innerHTML = `<span class="player-icon">${ICONS[i]}</span>
+    <input type="text" placeholder="玩家 ${i+1} 姓名">
+    <div class="cls-group">
+      <button class="cls-btn active" data-cls="warrior" onclick="pickClass(this)">⚔️</button>
+      <button class="cls-btn" data-cls="mage" onclick="pickClass(this)">🧙</button>
+      <button class="cls-btn" data-cls="rogue" onclick="pickClass(this)">🗡️</button>
+    </div>
+    <button class="btn-rm" onclick="rmPlayer(this)">✕</button>`;
+  list.appendChild(row);
+}
+
+function rmPlayer(btn) {
+  const list = document.getElementById('player-list');
+  if (list.querySelectorAll('.player-row').length <= 1) return;
+  btn.closest('.player-row').remove();
+}
+
+function pickClass(btn) {
+  btn.closest('.cls-group').querySelectorAll('.cls-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.player-row').querySelector('.player-icon').textContent = CLASSES[btn.dataset.cls]?.emoji || '?';
+}
+
+function setDiff(btn) {
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startGame() {
+  players = Array.from(document.querySelectorAll('#player-list .player-row')).map((row, i) => {
+    const name = row.querySelector('input').value.trim() || `玩家 ${i+1}`;
+    const clsKey = row.querySelector('.cls-btn.active')?.dataset.cls || 'warrior';
+    return { name, clsKey, cls: CLASSES[clsKey], icon: CLASSES[clsKey].emoji, hp: 3, maxHp: 3 };
+  });
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'flex';
+  buildHpBar(); buildHpCtrls(); buildDots(); renderScene(0);
+}
+
+// ── HP ───────────────────────────────────────────────────────────────────────
+function buildHpBar() {
+  document.getElementById('hp-bar').innerHTML = players.map((p, i) => `
+    <div class="p-hp">
+      <div class="p-hp-name">${p.icon} ${p.name}</div>
+      <div class="p-hp-hearts" id="h${i}"></div>
+      <div class="p-hp-class" style="background:${p.cls.color}22;color:${p.cls.color}">${p.cls.name}</div>
+    </div>`).join('');
+  renderHp();
+}
+
+function renderHp() {
+  players.forEach((p, i) => {
+    const el = document.getElementById(`h${i}`);
+    if (el) el.innerHTML = Array.from({length: p.maxHp}, (_, h) => `<span>${h < p.hp ? '❤️' : '🖤'}</span>`).join('');
+  });
+  if (players.length && players.every(p => p.hp === 0)) showGameOver();
+}
+
+function changeHp(i, d) {
+  players[i].hp = Math.max(0, Math.min(players[i].maxHp, players[i].hp + d));
+  renderHp();
+}
+
+function applyHpAll(delta) {
+  if (!delta) return;
+  players.forEach((_, i) => changeHp(i, delta));
+}
+
+function buildHpCtrls() {
+  document.getElementById('hp-ctrls').innerHTML = players.map((p, i) => `
+    <div class="hp-ctrl">
+      <span class="hp-ctrl-name">${p.icon} ${p.name}</span>
+      <button class="hp-cbtn hp-minus" onclick="changeHp(${i},-1)">−</button>
+      <button class="hp-cbtn hp-plus"  onclick="changeHp(${i},+1)">+</button>
+    </div>`).join('');
+  document.getElementById('skill-player-sel').innerHTML = players.map((p, i) =>
+    `<option value="${i}">${p.icon} ${p.name} — ${p.cls.name}</option>`).join('');
+}
+
+// ── SCENE TRANSITION ─────────────────────────────────────────────────────────
+function buildDots() {
+  document.getElementById('scene-dots').innerHTML = SCENES.map((_, i) => `<div class="dot" id="dot${i}"></div>`).join('');
+}
+
+function transitionToScene(idx) {
+  if (transitioning) return;
+  transitioning = true;
+  const s = SCENES[idx];
+  const ov = document.getElementById('transition-overlay');
+  const card = document.getElementById('trans-card');
+  document.getElementById('trans-emoji').textContent = s.emoji;
+  document.getElementById('trans-phase').textContent = s.phase;
+  document.getElementById('trans-title').textContent = s.title;
+  document.getElementById('trans-sub').textContent = s.subtitle;
+  card.classList.remove('visible');
+  ov.style.opacity = '0';
+  ov.style.transition = '';
+  ov.style.display = 'flex';
+  setTimeout(() => {
+    ov.style.transition = 'opacity .45s ease';
+    ov.style.opacity = '1';
+  }, 20);
+  setTimeout(() => card.classList.add('visible'), 520);
+  setTimeout(() => renderScene(idx), 950);
+  setTimeout(() => card.classList.remove('visible'), 1850);
+  setTimeout(() => { ov.style.opacity = '0'; }, 2150);
+  setTimeout(() => { ov.style.display = 'none'; ov.style.transition = ''; transitioning = false; }, 2650);
+}
+
+function renderScene(idx) {
+  scene = idx;
+  const s = SCENES[idx];
+  document.getElementById('scene-area').style.background = s.bg;
+  document.getElementById('s-emoji').textContent = s.emoji;
+  document.getElementById('s-phase').textContent = s.phase;
+  document.getElementById('s-title').textContent = s.title;
+  document.getElementById('s-subtitle').textContent = s.subtitle;
+  document.getElementById('c-text').innerHTML = s.challenge;
+  document.getElementById('c-fmt').innerHTML = s.format;
+  document.getElementById('script-body').innerHTML = s.script;
+  document.getElementById('dice-display').style.display = 'none';
+  document.getElementById('dice-faces').innerHTML = '';
+  SCENES.forEach((_, i) => {
+    const d = document.getElementById(`dot${i}`);
+    if (d) d.className = 'dot' + (i === idx ? ' active' : i < idx ? ' done' : '');
+  });
+  const encs = s.encounters || [];
+  const encSec = document.getElementById('enc-section');
+  encSec.style.display = encs.length ? 'block' : 'none';
+  document.getElementById('enc-buttons').innerHTML = encs.map((e, i) =>
+    `<button class="hbtn hbtn-purple" style="display:block;width:100%;margin-bottom:6px" onclick="openEncounter(${i})">${e.emoji} ${e.title}</button>`
+  ).join('');
+}
+
+function nextScene() { if (scene < SCENES.length - 1) transitionToScene(scene + 1); }
+function prevScene() { if (scene > 0) transitionToScene(scene - 1); }
+
+// ── DICE ─────────────────────────────────────────────────────────────────────
+function roll(count) {
+  const facesEl = document.getElementById('dice-faces');
+  const results = Array.from({length: count}, () => Math.ceil(Math.random() * 6));
+  const best = Math.max(...results);
+  facesEl.innerHTML = results.map(() => `<div class="dface rolling">🎲</div>`).join('');
+  setTimeout(() => {
+    facesEl.innerHTML = results.map(r => `<div class="dface">${DICE_FACES[r-1]}<br><small style="font-size:.5rem;color:var(--muted)">${r}</small></div>`).join('');
+    const ok = best >= 4;
+    document.getElementById('dice-display').style.display = 'block';
+    document.getElementById('d-val').textContent = DICE_FACES[best-1];
+    const vd = document.getElementById('d-verdict');
+    vd.textContent = ok ? `${best} — 成功！✅` : `${best} — 失敗... ❌`;
+    vd.className = `dice-verdict ${ok ? 'ok' : 'ng'}`;
+  }, 480);
+}
+
+// ── ENCOUNTERS ───────────────────────────────────────────────────────────────
+function openEncounter(encIdx) {
+  const enc = (SCENES[scene].encounters || [])[encIdx];
+  if (!enc) return;
+  pendingDiceOpt = null;
+  document.getElementById('enc-emoji').textContent = enc.emoji;
+  document.getElementById('enc-title').textContent = enc.title;
+  document.getElementById('enc-prompt').textContent = enc.prompt;
+  const optEl = document.getElementById('enc-options');
+  optEl.style.display = 'block';
+  optEl.innerHTML = enc.options.map((opt, i) => `
+    <button class="enc-opt" onclick="resolveEncounter(${encIdx},${i})">
+      <div class="enc-opt-label">${opt.label}</div>
+      <div class="enc-opt-phrase">Say: "${opt.phrase}"</div>
+    </button>`).join('');
+  document.getElementById('enc-dice').style.display = 'none';
+  document.getElementById('enc-dice-faces').innerHTML = '';
+  document.getElementById('enc-result').style.display = 'none';
+  const ov = document.getElementById('encounter-overlay');
+  ov.style.display = 'flex';
+  ov.classList.remove('show');
+  requestAnimationFrame(() => ov.classList.add('show'));
+}
+
+function resolveEncounter(encIdx, optIdx) {
+  const opt = (SCENES[scene].encounters || [])[encIdx]?.options[optIdx];
+  if (!opt) return;
+  document.getElementById('enc-options').style.display = 'none';
+  if (opt.outcome === 'dice') {
+    pendingDiceOpt = opt;
+    document.getElementById('enc-dice-hint').textContent = `🎲 骰出 4-6：${opt.flavorGood}  |  骰出 1-3：${opt.flavorBad}`;
+    document.getElementById('enc-dice').style.display = 'block';
+  } else {
+    showEncResult(opt.outcome, opt.flavor, opt.hpDelta || 0);
+  }
+}
+
+function rollEncounterDice() {
+  if (!pendingDiceOpt) return;
+  const opt = pendingDiceOpt;
+  const r = Math.ceil(Math.random() * 6);
+  const facesEl = document.getElementById('enc-dice-faces');
+  facesEl.innerHTML = `<div class="dface rolling">🎲</div>`;
+  setTimeout(() => {
+    facesEl.innerHTML = `<div class="dface">${DICE_FACES[r-1]}<br><small style="font-size:.5rem;color:var(--muted)">${r}</small></div>`;
+    document.getElementById('enc-dice').style.display = 'none';
+    if (r >= 4) showEncResult('success', opt.flavorGood, opt.hpGood || 0);
+    else        showEncResult('fail',    opt.flavorBad,  opt.hpBad  || 0);
+  }, 520);
+}
+
+function showEncResult(outcome, flavor, hpDelta) {
+  const icons = { success:'✅', fail:'💥', neutral:'💨' };
+  document.getElementById('enc-result-icon').textContent = icons[outcome] || '💫';
+  document.getElementById('enc-result-text').textContent = flavor;
+  document.getElementById('enc-result').style.display = 'block';
+  if (hpDelta) applyHpAll(hpDelta);
+}
+
+function closeEncounter() {
+  document.getElementById('encounter-overlay').style.display = 'none';
+  pendingDiceOpt = null;
+}
+
+// ── SKILLS ───────────────────────────────────────────────────────────────────
+function triggerSkill(clsKey) {
+  const pIdx = parseInt(document.getElementById('skill-player-sel').value) || 0;
+  const player = players[pIdx];
+  const cls = CLASSES[clsKey];
+  if (!cls) return;
+  const ov = document.getElementById('skill-overlay');
+  ov.style.background = cls.gradient;
+  ov.style.opacity = '1';
+  ov.style.transition = '';
+  document.getElementById('skill-player-name').textContent = (player?.name || '').toUpperCase() + ' 使用技能！';
+  document.getElementById('skill-big-emoji').textContent = cls.emoji;
+  document.getElementById('skill-name').textContent = cls.skill;
+  document.getElementById('skill-name').style.color = cls.color;
+  document.getElementById('skill-name-zh').textContent = cls.skillZh;
+  document.getElementById('skill-effect').textContent = cls.effect;
+  spawnParticles(cls.particle);
+  ov.style.display = 'flex';
+  setTimeout(() => { ov.style.transition = 'opacity .6s ease'; ov.style.opacity = '0'; }, 2800);
+  setTimeout(() => { ov.style.display = 'none'; ov.style.opacity = '1'; ov.style.transition = ''; document.getElementById('skill-particles').innerHTML = ''; }, 3450);
+}
+
+function spawnParticles(emoji) {
+  const container = document.getElementById('skill-particles');
+  container.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('span');
+    p.className = 'particle';
+    p.textContent = emoji;
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = '-30px';
+    p.style.fontSize = (16 + Math.random() * 22) + 'px';
+    p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    p.style.animationDelay = Math.random() * 1.2 + 's';
+    container.appendChild(p);
+  }
+}
+
+// ── HOST & END ────────────────────────────────────────────────────────────────
+function toggleHost() {
+  hostOpen = !hostOpen;
+  document.getElementById('host-body').style.display = hostOpen ? 'grid' : 'none';
+  document.getElementById('host-icon').textContent = hostOpen ? '▲' : '▼';
+}
+
+function showVictory()  { document.getElementById('victory-screen').style.display = 'flex'; }
+function showGameOver() { document.getElementById('gameover-screen').style.display = 'flex'; }
+
+function resetGame() {
+  ['victory-screen','gameover-screen'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  transitioning = false;
+}
+</script>
+</body>
+</html>
