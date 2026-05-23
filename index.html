@@ -3,455 +3,193 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>測試頁面</title>
+  <title>英語勇者團 — 主選單</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --bg: #0d0d1a;
+      --card: #1e1e35;
+      --gold: #d4a843;
+      --gold-l: #f0c96a;
+      --border: #2e2e50;
+      --text: #e8dfc8;
+      --muted: #7a7a9a;
     }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
-      color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       padding: 40px 20px;
+      background-image: radial-gradient(ellipse at 20% 30%, #1a0a3a55 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 70%, #3a0a0a55 0%, transparent 60%);
     }
 
-    header {
+    .hero {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 52px;
     }
 
-    header h1 {
-      font-size: 2.4rem;
-      color: #1a1a2e;
-      margin-bottom: 8px;
+    .hero-emoji {
+      font-size: 5rem;
+      display: block;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
     }
 
-    header p {
-      color: #666;
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 40px rgba(212,168,67,.4);
+      letter-spacing: .04em;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
       font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
       width: 100%;
-      max-width: 900px;
+      max-width: 860px;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    }
-
-    .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 16px;
-      color: #1a1a2e;
-      border-bottom: 2px solid #e8eaf0;
-      padding-bottom: 10px;
-    }
-
-    /* Button test */
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .btn {
-      padding: 8px 18px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-
-    .btn:hover { opacity: 0.85; }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: #4361ee; color: #fff; }
-    .btn-success { background: #2ecc71; color: #fff; }
-    .btn-danger  { background: #e74c3c; color: #fff; }
-    .btn-outline { background: transparent; color: #4361ee; border: 2px solid #4361ee; }
-
-    /* Form test */
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      color: #555;
-      margin-bottom: 4px;
-    }
-
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid #d0d5dd;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      border-color: #4361ee;
-    }
-
-    /* Status badges */
-    .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .badge-info    { background: #dbeafe; color: #1d4ed8; }
-    .badge-success { background: #dcfce7; color: #166534; }
-    .badge-warning { background: #fef9c3; color: #854d0e; }
-    .badge-error   { background: #fee2e2; color: #991b1b; }
-
-    /* Counter */
-    .counter {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .counter span {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #4361ee;
-      min-width: 40px;
-      text-align: center;
-    }
-
-    /* Progress */
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: #e8eaf0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
-
-    .fill-blue   { background: #4361ee; width: 72%; }
-    .fill-green  { background: #2ecc71; width: 45%; }
-    .fill-orange { background: #f39c12; width: 88%; }
-
-    /* Toast */
-    #toast-area {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
+    .game-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      z-index: 999;
+      gap: 12px;
     }
 
-    .toast {
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 0.9rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: slideIn 0.3s ease;
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+      box-shadow: 0 8px 30px rgba(212,168,67,.15);
     }
 
-    @keyframes slideIn {
-      from { transform: translateX(60px); opacity: 0; }
-      to   { transform: translateX(0);    opacity: 1; }
-    }
+    .card-emoji { font-size: 2.8rem; }
 
-    .toast-success { background: #2ecc71; }
-    .toast-error   { background: #e74c3c; }
-    .toast-info    { background: #4361ee; }
-
-    /* Calculator */
-    .calc-card {
-      grid-column: 1 / -1;
-      max-width: 320px;
-      justify-self: center;
-      width: 100%;
-    }
-
-    .calc-display {
-      background: #1a1a2e;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-      text-align: right;
-    }
-
-    .calc-expr {
-      color: #888;
-      font-size: 0.85rem;
-      min-height: 1.2em;
-      margin-bottom: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .calc-result {
-      color: #fff;
-      font-size: 2rem;
+    .card-tag {
+      display: inline-block;
+      font-size: .65rem;
       font-weight: 700;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(212,168,67,.15);
+      color: var(--gold);
+      width: fit-content;
     }
 
-    .calc-buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
     }
 
-    .calc-btn {
-      padding: 16px 0;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
+    .card-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-arrow {
+      font-size: .85rem;
+      color: var(--gold);
       font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
+      margin-top: 4px;
     }
 
-    .calc-btn:hover  { opacity: 0.85; }
-    .calc-btn:active { transform: scale(0.94); }
+    .coming-soon {
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
 
-    .calc-btn-num  { background: #e8eaf0; color: #1a1a2e; }
-    .calc-btn-op   { background: #4361ee; color: #fff; }
-    .calc-btn-eq   { background: #2ecc71; color: #fff; }
-    .calc-btn-fn   { background: #c5cae9; color: #1a1a2e; }
-    .calc-btn-zero { grid-column: span 2; }
+    .coming-soon .card-tag {
+      background: rgba(122,122,154,.15);
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 52px;
+      font-size: .78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.8;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>測試頁面</h1>
-    <p>UI 元件與互動功能展示</p>
-  </header>
+  <div class="hero">
+    <span class="hero-emoji">⚔️</span>
+    <h1>英語勇者團</h1>
+    <p>English Quest Adventure<br>選擇你的冒險，開口說英語！</p>
+  </div>
 
   <div class="card-grid">
 
-    <!-- Buttons -->
-    <div class="card">
-      <h2>按鈕</h2>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="showToast('已點擊主要按鈕', 'info')">主要</button>
-        <button class="btn btn-success" onclick="showToast('操作成功！', 'success')">成功</button>
-        <button class="btn btn-danger"  onclick="showToast('操作失敗！', 'error')">危險</button>
-        <button class="btn btn-outline" onclick="showToast('外框按鈕', 'info')">外框</button>
+    <a class="game-card" href="DND_v1.html">
+      <span class="card-emoji">🐉</span>
+      <span class="card-tag">v1.0 — 已上線</span>
+      <div class="card-title">地下城闖關</div>
+      <div class="card-desc">
+        帶領勇者隊伍穿越洞穴、挑戰獅身人面獸、征服巨龍！<br>
+        包含場景切換、遭遇事件、職業技能發動。
       </div>
-    </div>
+      <div class="card-arrow">開始遊戲 →</div>
+    </a>
 
-    <!-- Form -->
-    <div class="card">
-      <h2>表單</h2>
-      <div class="form-group">
-        <label>姓名</label>
-        <input type="text" placeholder="請輸入姓名">
+    <a class="game-card" href="DND_v2.html">
+      <span class="card-emoji">🗺️</span>
+      <span class="card-tag">v2.0 — 已上線</span>
+      <div class="card-title">路徑抉擇</div>
+      <div class="card-desc">
+        五道難關，三條岔路，技能只能使用一次！<br>
+        選擇最佳路線、發動角色技能、骰子決定命運。
       </div>
-      <div class="form-group">
-        <label>類別</label>
-        <select>
-          <option>選項 A</option>
-          <option>選項 B</option>
-          <option>選項 C</option>
-        </select>
+      <div class="card-arrow">開始遊戲 →</div>
+    </a>
+
+    <div class="game-card coming-soon">
+      <span class="card-emoji">🏰</span>
+      <span class="card-tag">即將推出</span>
+      <div class="card-title">城堡保衛戰</div>
+      <div class="card-desc">
+        守衛王國的語言之城！用英語下達命令、指揮士兵，抵禦魔王軍的進攻。
       </div>
-      <button class="btn btn-primary" onclick="showToast('表單已提交', 'success')">送出</button>
-    </div>
-
-    <!-- Badges -->
-    <div class="card">
-      <h2>狀態標籤</h2>
-      <div class="badge-row">
-        <span class="badge badge-info">資訊</span>
-        <span class="badge badge-success">成功</span>
-        <span class="badge badge-warning">警告</span>
-        <span class="badge badge-error">錯誤</span>
-      </div>
-    </div>
-
-    <!-- Counter -->
-    <div class="card">
-      <h2>計數器</h2>
-      <div class="counter">
-        <button class="btn btn-outline" onclick="changeCount(-1)">−</button>
-        <span id="count">0</span>
-        <button class="btn btn-primary" onclick="changeCount(1)">+</button>
-      </div>
-    </div>
-
-    <!-- Progress -->
-    <div class="card">
-      <h2>進度條</h2>
-      <div class="progress-label"><span>任務進度</span><span>72%</span></div>
-      <div class="progress-bar"><div class="progress-fill fill-blue"></div></div>
-
-      <div class="progress-label"><span>上傳進度</span><span>45%</span></div>
-      <div class="progress-bar"><div class="progress-fill fill-green"></div></div>
-
-      <div class="progress-label"><span>系統負載</span><span>88%</span></div>
-      <div class="progress-bar"><div class="progress-fill fill-orange"></div></div>
-    </div>
-
-    <!-- Toast trigger -->
-    <div class="card">
-      <h2>通知訊息</h2>
-      <div class="btn-row">
-        <button class="btn btn-success" onclick="showToast('操作成功完成！', 'success')">成功通知</button>
-        <button class="btn btn-danger"  onclick="showToast('發生錯誤，請重試。', 'error')">錯誤通知</button>
-        <button class="btn btn-primary" onclick="showToast('這是一則資訊通知。', 'info')">資訊通知</button>
-      </div>
-    </div>
-
-    <!-- Calculator -->
-    <div class="card calc-card">
-      <h2>計算機</h2>
-      <div class="calc-display">
-        <div class="calc-expr" id="calc-expr"></div>
-        <div class="calc-result" id="calc-result">0</div>
-      </div>
-      <div class="calc-buttons">
-        <button class="calc-btn calc-btn-fn" onclick="calcFn('clear')">C</button>
-        <button class="calc-btn calc-btn-fn" onclick="calcFn('sign')">+/-</button>
-        <button class="calc-btn calc-btn-fn" onclick="calcFn('percent')">%</button>
-        <button class="calc-btn calc-btn-op" onclick="calcOp('/')">÷</button>
-
-        <button class="calc-btn calc-btn-num" onclick="calcNum('7')">7</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('8')">8</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('9')">9</button>
-        <button class="calc-btn calc-btn-op" onclick="calcOp('*')">×</button>
-
-        <button class="calc-btn calc-btn-num" onclick="calcNum('4')">4</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('5')">5</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('6')">6</button>
-        <button class="calc-btn calc-btn-op" onclick="calcOp('-')">−</button>
-
-        <button class="calc-btn calc-btn-num" onclick="calcNum('1')">1</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('2')">2</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('3')">3</button>
-        <button class="calc-btn calc-btn-op" onclick="calcOp('+')">+</button>
-
-        <button class="calc-btn calc-btn-num calc-btn-zero" onclick="calcNum('0')">0</button>
-        <button class="calc-btn calc-btn-num" onclick="calcNum('.')">.</button>
-        <button class="calc-btn calc-btn-eq" onclick="calcFn('eq')">=</button>
-      </div>
+      <div class="card-arrow">敬請期待</div>
     </div>
 
   </div>
 
-  <div id="toast-area"></div>
-
-  <script>
-    let count = 0;
-
-    function changeCount(delta) {
-      count += delta;
-      document.getElementById('count').textContent = count;
-    }
-
-    function showToast(message, type) {
-      const area = document.getElementById('toast-area');
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.textContent = message;
-      area.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Calculator
-    const calcState = { current: '0', prev: null, op: null, fresh: true };
-
-    function calcRender() {
-      const exprMap = { '+': '+', '-': '−', '*': '×', '/': '÷' };
-      const expr = calcState.prev !== null && calcState.op
-        ? `${calcState.prev} ${exprMap[calcState.op]}`
-        : '';
-      document.getElementById('calc-expr').textContent = expr;
-      document.getElementById('calc-result').textContent = calcState.current;
-    }
-
-    function calcNum(d) {
-      if (calcState.fresh) { calcState.current = ''; calcState.fresh = false; }
-      if (d === '.' && calcState.current.includes('.')) return;
-      if (calcState.current === '0' && d !== '.') { calcState.current = d; }
-      else { calcState.current += d; }
-      calcRender();
-    }
-
-    function calcOp(op) {
-      if (calcState.prev !== null && calcState.op && !calcState.fresh) {
-        calcFn('eq', true);
-      }
-      calcState.prev = parseFloat(calcState.current);
-      calcState.op = op;
-      calcState.fresh = true;
-      calcRender();
-    }
-
-    function calcFn(fn, internal) {
-      const cur = parseFloat(calcState.current);
-      if (fn === 'clear') {
-        Object.assign(calcState, { current: '0', prev: null, op: null, fresh: true });
-      } else if (fn === 'sign') {
-        calcState.current = String(-cur);
-      } else if (fn === 'percent') {
-        calcState.current = String(cur / 100);
-      } else if (fn === 'eq') {
-        if (calcState.op === null || calcState.prev === null) return;
-        const ops = { '+': (a, b) => a + b, '-': (a, b) => a - b, '*': (a, b) => a * b, '/': (a, b) => b === 0 ? 'Error' : a / b };
-        const res = ops[calcState.op](calcState.prev, cur);
-        calcState.current = typeof res === 'number' ? String(parseFloat(res.toPrecision(12))) : res;
-        calcState.prev = null;
-        calcState.op = null;
-        calcState.fresh = true;
-      }
-      if (!internal) calcRender();
-    }
-  </script>
+  <footer>
+    英語勇者團 © 2026 &nbsp;·&nbsp; 讓開口說英語變得有趣
+  </footer>
 
 </body>
 </html>
