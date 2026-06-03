@@ -3,213 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>英語勇者團 — 主選單</title>
+  <title>計算機</title>
   <style>
-    :root {
-      --bg: #0d0d1a;
-      --card: #1e1e35;
-      --gold: #d4a843;
-      --gold-l: #f0c96a;
-      --border: #2e2e50;
-      --text: #e8dfc8;
-      --muted: #7a7a9a;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #1a1a2e;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
-      background-image: radial-gradient(ellipse at 20% 30%, #1a0a3a55 0%, transparent 60%),
-                        radial-gradient(ellipse at 80% 70%, #3a0a0a55 0%, transparent 60%);
     }
 
-    .hero {
-      text-align: center;
-      margin-bottom: 52px;
+    .calculator {
+      background: #16213e;
+      border-radius: 24px;
+      padding: 24px;
+      width: 320px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06);
     }
 
-    .hero-emoji {
-      font-size: 5rem;
-      display: block;
+    .display {
+      background: #0f3460;
+      border-radius: 14px;
+      padding: 20px 20px 14px;
       margin-bottom: 20px;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-12px); }
-    }
-
-    .hero h1 {
-      font-size: 2.8rem;
-      font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 0 40px rgba(212,168,67,.4);
-      letter-spacing: .04em;
-      margin-bottom: 10px;
-    }
-
-    .hero p {
-      font-size: 1rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 860px;
-    }
-
-    .game-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform .2s, border-color .2s, box-shadow .2s;
+      min-height: 100px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      justify-content: flex-end;
+      align-items: flex-end;
+      overflow: hidden;
     }
 
-    .game-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--gold);
-      box-shadow: 0 8px 30px rgba(212,168,67,.15);
+    .display .expr {
+      font-size: 0.85rem;
+      color: #7a8cb5;
+      min-height: 1.2em;
+      word-break: break-all;
+      text-align: right;
     }
 
-    .card-emoji { font-size: 2.8rem; }
-
-    .card-tag {
-      display: inline-block;
-      font-size: .65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .15em;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: rgba(212,168,67,.15);
-      color: var(--gold);
-      width: fit-content;
+    .display .result {
+      font-size: 2.6rem;
+      font-weight: 300;
+      color: #e2e8f0;
+      word-break: break-all;
+      text-align: right;
+      line-height: 1.2;
     }
 
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      height: 62px;
+      cursor: pointer;
+      transition: transform .08s, filter .08s;
+      user-select: none;
+    }
+
+    button:active {
+      transform: scale(.93);
+      filter: brightness(.85);
+    }
+
+    .btn-num {
+      background: #1e3a5f;
+      color: #e2e8f0;
+    }
+
+    .btn-op {
+      background: #0f4c8a;
+      color: #93c5fd;
+    }
+
+    .btn-eq {
+      background: #2563eb;
       color: #fff;
+      font-size: 1.4rem;
     }
 
-    .card-desc {
-      font-size: .85rem;
-      color: var(--muted);
-      line-height: 1.6;
-      flex: 1;
+    .btn-clear {
+      background: #7f1d1d;
+      color: #fca5a5;
     }
 
-    .card-arrow {
-      font-size: .85rem;
-      color: var(--gold);
-      font-weight: 600;
-      margin-top: 4px;
+    .btn-func {
+      background: #1e3a5f;
+      color: #94a3b8;
+      font-size: 0.95rem;
     }
 
-    .coming-soon {
-      opacity: .45;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    .coming-soon .card-tag {
-      background: rgba(122,122,154,.15);
-      color: var(--muted);
-    }
-
-    footer {
-      margin-top: 52px;
-      font-size: .78rem;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.8;
-    }
+    .span2 { grid-column: span 2; }
   </style>
 </head>
 <body>
 
-  <div class="hero">
-    <span class="hero-emoji">⚔️</span>
-    <h1>英語勇者團</h1>
-    <p>English Quest Adventure<br>選擇你的冒險，開口說英語！</p>
+<div class="calculator">
+  <div class="display">
+    <div class="expr" id="expr"></div>
+    <div class="result" id="result">0</div>
   </div>
 
-  <div class="card-grid">
+  <div class="buttons">
+    <button class="btn-clear" onclick="clearAll()">AC</button>
+    <button class="btn-func"  onclick="toggleSign()">+/−</button>
+    <button class="btn-func"  onclick="percent()">%</button>
+    <button class="btn-op"    onclick="inputOp('/')">÷</button>
 
-    <a class="game-card" href="DND_v1.html">
-      <span class="card-emoji">🐉</span>
-      <span class="card-tag">v1.0 — 已上線</span>
-      <div class="card-title">地下城闖關</div>
-      <div class="card-desc">
-        帶領勇者隊伍穿越洞穴、挑戰獅身人面獸、征服巨龍！<br>
-        包含場景切換、遭遇事件、職業技能發動。
-      </div>
-      <div class="card-arrow">開始遊戲 →</div>
-    </a>
+    <button class="btn-num" onclick="inputNum('7')">7</button>
+    <button class="btn-num" onclick="inputNum('8')">8</button>
+    <button class="btn-num" onclick="inputNum('9')">9</button>
+    <button class="btn-op"  onclick="inputOp('*')">×</button>
 
-    <a class="game-card" href="DND_v2.html">
-      <span class="card-emoji">🗺️</span>
-      <span class="card-tag">v2.0 — 已上線</span>
-      <div class="card-title">路徑抉擇</div>
-      <div class="card-desc">
-        五道難關，三條岔路，技能只能使用一次！<br>
-        選擇最佳路線、發動角色技能、骰子決定命運。
-      </div>
-      <div class="card-arrow">開始遊戲 →</div>
-    </a>
+    <button class="btn-num" onclick="inputNum('4')">4</button>
+    <button class="btn-num" onclick="inputNum('5')">5</button>
+    <button class="btn-num" onclick="inputNum('6')">6</button>
+    <button class="btn-op"  onclick="inputOp('-')">−</button>
 
-    <div class="game-card coming-soon">
-      <span class="card-emoji">🏰</span>
-      <span class="card-tag">即將推出</span>
-      <div class="card-title">城堡保衛戰</div>
-      <div class="card-desc">
-        守衛王國的語言之城！用英語下達命令、指揮士兵，抵禦魔王軍的進攻。
-      </div>
-      <div class="card-arrow">敬請期待</div>
-    </div>
+    <button class="btn-num" onclick="inputNum('1')">1</button>
+    <button class="btn-num" onclick="inputNum('2')">2</button>
+    <button class="btn-num" onclick="inputNum('3')">3</button>
+    <button class="btn-op"  onclick="inputOp('+')">+</button>
 
-    <div class="game-card coming-soon">
-      <span class="card-emoji">🌊</span>
-      <span class="card-tag">即將推出</span>
-      <div class="card-title">深海迷航</div>
-      <div class="card-desc">
-        潛入英語的深海世界！與神秘海洋生物對話，解開古老語言謎題。
-      </div>
-      <div class="card-arrow">敬請期待</div>
-    </div>
-
-    <div class="game-card coming-soon">
-      <span class="card-emoji">🚀</span>
-      <span class="card-tag">即將推出</span>
-      <div class="card-title">太空冒險</div>
-      <div class="card-desc">
-        登上星際飛船，探索未知星球！用英語與外星文明交涉，化解宇宙危機。
-      </div>
-      <div class="card-arrow">敬請期待</div>
-    </div>
-
+    <button class="btn-num span2" onclick="inputNum('0')">0</button>
+    <button class="btn-num" onclick="inputDot()">.</button>
+    <button class="btn-eq"  onclick="calculate()">=</button>
   </div>
+</div>
 
-  <footer>
-    英語勇者團 © 2026 &nbsp;·&nbsp; 讓開口說英語變得有趣
-  </footer>
+<script>
+  let current = '0';
+  let prev = '';
+  let operator = '';
+  let justCalc = false;
+
+  const resultEl = document.getElementById('result');
+  const exprEl   = document.getElementById('expr');
+
+  const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+
+  function updateDisplay() {
+    resultEl.textContent = formatNum(current);
+  }
+
+  function formatNum(n) {
+    if (n === 'Error') return 'Error';
+    const num = parseFloat(n);
+    if (isNaN(num)) return n;
+    if (Math.abs(num) >= 1e13 || (Math.abs(num) < 1e-6 && num !== 0)) {
+      return num.toExponential(6).replace(/\.?0+e/, 'e');
+    }
+    const parts = n.split('.');
+    parts[0] = parseInt(parts[0], 10).toLocaleString('zh-TW');
+    return parts.join('.');
+  }
+
+  function inputNum(n) {
+    if (justCalc) { current = n; justCalc = false; }
+    else if (current === '0') current = n;
+    else if (current.length < 15) current += n;
+    updateDisplay();
+  }
+
+  function inputDot() {
+    if (justCalc) { current = '0.'; justCalc = false; }
+    else if (!current.includes('.')) current += '.';
+    updateDisplay();
+  }
+
+  function inputOp(op) {
+    justCalc = false;
+    if (operator && !justCalc) {
+      const r = compute(parseFloat(prev), parseFloat(current), operator);
+      current = String(r);
+      prev = current;
+    } else {
+      prev = current;
+    }
+    operator = op;
+    exprEl.textContent = formatNum(prev) + ' ' + opSymbol[op];
+    justCalc = false;
+    current = '0';
+    updateDisplay();
+  }
+
+  function compute(a, b, op) {
+    switch (op) {
+      case '+': return round(a + b);
+      case '-': return round(a - b);
+      case '*': return round(a * b);
+      case '/': return b === 0 ? 'Error' : round(a / b);
+    }
+  }
+
+  function round(n) {
+    return parseFloat(n.toPrecision(13));
+  }
+
+  function calculate() {
+    if (!operator) return;
+    const a = parseFloat(prev);
+    const b = parseFloat(current);
+    exprEl.textContent = formatNum(prev) + ' ' + opSymbol[operator] + ' ' + formatNum(current) + ' =';
+    const r = compute(a, b, operator);
+    current = String(r);
+    operator = '';
+    prev = '';
+    justCalc = true;
+    updateDisplay();
+  }
+
+  function clearAll() {
+    current = '0'; prev = ''; operator = ''; justCalc = false;
+    exprEl.textContent = '';
+    updateDisplay();
+  }
+
+  function toggleSign() {
+    if (current === '0' || current === 'Error') return;
+    current = current.startsWith('-') ? current.slice(1) : '-' + current;
+    updateDisplay();
+  }
+
+  function percent() {
+    const n = parseFloat(current);
+    current = String(round(n / 100));
+    updateDisplay();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key >= '0' && e.key <= '9') inputNum(e.key);
+    else if (e.key === '.') inputDot();
+    else if (e.key === '+') inputOp('+');
+    else if (e.key === '-') inputOp('-');
+    else if (e.key === '*') inputOp('*');
+    else if (e.key === '/') { e.preventDefault(); inputOp('/'); }
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Escape') clearAll();
+    else if (e.key === 'Backspace') {
+      if (current.length > 1) current = current.slice(0, -1);
+      else current = '0';
+      updateDisplay();
+    }
+  });
+</script>
 
 </body>
 </html>
