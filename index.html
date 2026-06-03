@@ -1,1435 +1,215 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WeLink.ai — AI下單，『維』你是從</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --color-primary: #E87722;
-    --color-primary-dark: #C45F10;
-    --color-bg: #EAE6D8;
-    --color-bg-dark: #1A1A1A;
-    --color-text: #1A1A1A;
-    --color-text-muted: #6B6B6B;
-    --color-cream: #F5F0E8;
-    --color-grid: rgba(0,0,0,0.06);
-    --font-main: 'Noto Sans TC', 'Inter', sans-serif;
-    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 0.3s var(--ease-smooth);
-    --max-width: 1200px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: var(--font-main);
-    background: var(--color-bg);
-    color: var(--color-text);
-    overflow-x: hidden;
-  }
-
-  /* ─── GRID TEXTURE ─── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-      linear-gradient(var(--color-grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-
-  /* ─── NAVBAR ─── */
-  nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 1.2rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.4s var(--ease-smooth);
-  }
-
-  nav.scrolled {
-    background: rgba(234, 230, 216, 0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    padding: 0.8rem 2rem;
-  }
-
-  .nav-logo {
-    font-size: 1.5rem;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .nav-logo span.ai { color: var(--color-primary); }
-
-  .nav-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-  }
-
-  .nav-links a {
-    text-decoration: none;
-    color: var(--color-text);
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color var(--transition-base);
-    letter-spacing: 0.02em;
-  }
-
-  .nav-links a:hover { color: var(--color-primary); }
-
-  .nav-cta {
-    background: var(--color-text);
-    color: var(--color-bg) !important;
-    padding: 0.5rem 1.2rem;
-    border-radius: 4px;
-    transition: background var(--transition-base), transform var(--transition-base) !important;
-  }
-
-  .nav-cta:hover {
-    background: var(--color-primary) !important;
-    color: white !important;
-    transform: translateY(-1px);
-  }
-
-  /* ─── HERO ─── */
-  #hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 8rem 2rem 4rem;
-    overflow: hidden;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--color-primary);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 0.35rem 0.9rem;
-    margin-bottom: 1.5rem;
-    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
-  }
-
-  .hero-content {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-  }
-
-  .hero-title {
-    font-size: clamp(2.8rem, 6vw, 5.5rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-  }
-
-  .hero-title .highlight { color: var(--color-primary); }
-
-  .hero-subtitle {
-    margin-top: 1.5rem;
-    font-size: 1.1rem;
-    color: var(--color-text-muted);
-    line-height: 1.7;
-    max-width: 440px;
-  }
-
-  .hero-slogan {
-    margin-top: 2rem;
-    display: inline-block;
-    font-size: 1.5rem;
-    font-weight: 900;
-    border: 3px solid var(--color-text);
-    padding: 0.6rem 1.4rem;
-    position: relative;
-    cursor: default;
-    transition: all var(--transition-base);
-  }
-
-  .hero-slogan::after {
-    content: '';
-    position: absolute;
-    inset: 4px -4px -4px 4px;
-    background: var(--color-primary);
-    z-index: -1;
-    transition: all var(--transition-base);
-  }
-
-  .hero-slogan:hover::after { inset: 6px -6px -6px 6px; }
-
-  .hero-cta-group {
-    margin-top: 2.5rem;
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .btn-primary {
-    background: var(--color-primary);
-    color: white;
-    border: none;
-    padding: 0.85rem 2rem;
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: var(--font-main);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.02em;
-  }
-
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.15);
-    transform: translateX(-100%);
-    transition: transform 0.4s var(--ease-smooth);
-  }
-
-  .btn-primary:hover::before { transform: translateX(0); }
-
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,119,34,0.35); }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--color-text);
-    border: 2px solid var(--color-text);
-    padding: 0.85rem 2rem;
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: var(--font-main);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    letter-spacing: 0.02em;
-  }
-
-  .btn-secondary:hover {
-    background: var(--color-text);
-    color: var(--color-bg);
-    transform: translateY(-2px);
-  }
-
-  /* Hero visual */
-  .hero-visual {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .hero-blueprint {
-    width: 100%;
-    max-width: 500px;
-    position: relative;
-  }
-
-  .blueprint-box {
-    border: 2px solid var(--color-text);
-    padding: 2rem;
-    position: relative;
-    background: rgba(234, 230, 216, 0.6);
-  }
-
-  .blueprint-corner {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-color: var(--color-primary);
-    border-style: solid;
-  }
-
-  .blueprint-corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
-  .blueprint-corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; }
-  .blueprint-corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }
-  .blueprint-corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
-
-  .blueprint-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    color: var(--color-text-muted);
-    font-family: 'Inter', monospace;
-    margin-bottom: 0.5rem;
-  }
-
-  .circuit-svg {
-    width: 100%;
-    height: auto;
-  }
-
-  /* ─── SECTION COMMONS ─── */
-  section {
-    position: relative;
-    padding: 6rem 2rem;
-    z-index: 1;
-  }
-
-  .container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--color-primary);
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-    font-family: 'Inter', sans-serif;
-  }
-
-  .section-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 900;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
-  }
-
-  .section-desc {
-    font-size: 1.05rem;
-    color: var(--color-text-muted);
-    line-height: 1.75;
-    max-width: 560px;
-  }
-
-  /* Fade-in on scroll */
-  .fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.7s var(--ease-smooth), transform 0.7s var(--ease-smooth);
-  }
-
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .fade-in-delay-1 { transition-delay: 0.1s; }
-  .fade-in-delay-2 { transition-delay: 0.2s; }
-  .fade-in-delay-3 { transition-delay: 0.3s; }
-  .fade-in-delay-4 { transition-delay: 0.4s; }
-
-  /* ─── USP SECTION ─── */
-  #usp {
-    background: var(--color-bg-dark);
-    color: white;
-  }
-
-  #usp .section-label { color: var(--color-primary); }
-  #usp .section-title { color: white; }
-  #usp .section-desc { color: rgba(255,255,255,0.6); }
-
-  .usp-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    margin-top: 3rem;
-  }
-
-  .usp-card {
-    background: #242424;
-    padding: 2.5rem;
-    position: relative;
-    overflow: hidden;
-    transition: background var(--transition-base);
-    cursor: default;
-  }
-
-  .usp-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--color-primary);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s var(--ease-smooth);
-  }
-
-  .usp-card:hover { background: #2c2c2c; }
-  .usp-card:hover::before { transform: scaleX(1); }
-
-  .usp-tag {
-    display: inline-block;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    color: var(--color-primary);
-    border: 1px solid var(--color-primary);
-    padding: 0.2rem 0.6rem;
-    margin-bottom: 1rem;
-    font-family: 'Inter', monospace;
-  }
-
-  .usp-card h3 {
-    font-size: 1.4rem;
-    font-weight: 900;
-    margin-bottom: 1rem;
-    color: white;
-  }
-
-  .usp-card p {
-    font-size: 0.95rem;
-    line-height: 1.75;
-    color: rgba(255,255,255,0.65);
-  }
-
-  .usp-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    font-size: 1.3rem;
-  }
-
-  /* ─── COMPARISON ─── */
-  #comparison {
-    background: var(--color-cream);
-  }
-
-  .compare-table {
-    margin-top: 3rem;
-    border: 2px solid var(--color-text);
-    overflow: hidden;
-  }
-
-  .compare-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr;
-    background: var(--color-text);
-    color: var(--color-bg);
-  }
-
-  .compare-header div {
-    padding: 1rem 1.5rem;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-  }
-
-  .compare-header div:nth-child(3) { color: var(--color-primary); }
-
-  .compare-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    transition: background var(--transition-base);
-  }
-
-  .compare-row:hover { background: rgba(232,119,34,0.05); }
-
-  .compare-row div {
-    padding: 1.2rem 1.5rem;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .compare-row div:first-child { font-weight: 700; }
-  .compare-row div:nth-child(3) {
-    font-weight: 700;
-    color: var(--color-primary);
-  }
-
-  .compare-row div:nth-child(2) { color: var(--color-text-muted); }
-
-  /* ─── AUDIENCE ─── */
-  #audience {
-    background: var(--color-bg);
-  }
-
-  .audience-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    align-items: center;
-    margin-top: 3rem;
-  }
-
-  .audience-radar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .radar-svg-container {
-    position: relative;
-    width: 320px;
-    height: 320px;
-  }
-
-  .radar-label {
-    position: absolute;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-  }
-
-  .radar-label.top { top: -10px; left: 50%; transform: translateX(-50%); }
-  .radar-label.bl { bottom: 0; left: 0; }
-  .radar-label.br { bottom: 0; right: 0; }
-
-  .audience-info h3 {
-    font-size: 1.6rem;
-    font-weight: 900;
-    margin-bottom: 1rem;
-  }
-
-  .audience-info p {
-    color: var(--color-text-muted);
-    line-height: 1.75;
-    margin-bottom: 1.5rem;
-  }
-
-  .insight-box {
-    background: var(--color-primary);
-    color: white;
-    padding: 1.2rem 1.5rem;
-    position: relative;
-  }
-
-  .insight-box::before {
-    content: 'INSIGHT';
-    display: block;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
-    font-family: 'Inter', monospace;
-  }
-
-  .insight-box p { font-size: 0.9rem; line-height: 1.7; }
-
-  /* ─── STATS ─── */
-  #stats {
-    background: var(--color-primary);
-    color: white;
-    padding: 4rem 2rem;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-    text-align: center;
-  }
-
-  .stat-item {
-    padding: 1.5rem;
-  }
-
-  .stat-number {
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    font-family: 'Inter', sans-serif;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    opacity: 0.85;
-    line-height: 1.5;
-  }
-
-  /* ─── HOW IT WORKS ─── */
-  #how {
-    background: var(--color-bg-dark);
-    color: white;
-  }
-
-  #how .section-label { color: var(--color-primary); }
-  #how .section-title { color: white; }
-
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    margin-top: 3rem;
-    position: relative;
-  }
-
-  .steps::before {
-    content: '';
-    position: absolute;
-    top: 40px;
-    left: 12%;
-    right: 12%;
-    height: 2px;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-primary));
-    z-index: 0;
-  }
-
-  .step {
-    position: relative;
-    padding: 0 1.5rem;
-    text-align: center;
-    z-index: 1;
-  }
-
-  .step-number {
-    width: 80px;
-    height: 80px;
-    background: #242424;
-    border: 2px solid var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--color-primary);
-    margin: 0 auto 1.5rem;
-    position: relative;
-    font-family: 'Inter', monospace;
-    transition: all var(--transition-base);
-    cursor: default;
-  }
-
-  .step:hover .step-number {
-    background: var(--color-primary);
-    color: white;
-    transform: scale(1.1);
-  }
-
-  .step-time {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    color: var(--color-primary);
-    margin-bottom: 0.5rem;
-    font-family: 'Inter', monospace;
-  }
-
-  .step h4 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 0.75rem;
-  }
-
-  .step p {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.65;
-  }
-
-  /* ─── MARKETING ─── */
-  #marketing {
-    background: var(--color-cream);
-  }
-
-  .marketing-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 3rem;
-  }
-
-  .mkt-card {
-    border: 2px solid var(--color-text);
-    padding: 2rem;
-    position: relative;
-    cursor: default;
-    transition: all var(--transition-base);
-    overflow: hidden;
-  }
-
-  .mkt-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--color-primary);
-    transform: scaleY(0);
-    transform-origin: bottom;
-    transition: transform 0.4s var(--ease-smooth);
-    z-index: 0;
-  }
-
-  .mkt-card:hover::after { transform: scaleY(1); }
-  .mkt-card:hover { color: white; border-color: var(--color-primary); }
-  .mkt-card:hover .mkt-num { color: rgba(255,255,255,0.3); }
-  .mkt-card:hover h3 { color: white; }
-  .mkt-card:hover p { color: rgba(255,255,255,0.85); }
-
-  .mkt-card > * { position: relative; z-index: 1; }
-
-  .mkt-num {
-    font-size: 3.5rem;
-    font-weight: 900;
-    color: rgba(0,0,0,0.08);
-    line-height: 1;
-    font-family: 'Inter', sans-serif;
-    transition: color var(--transition-base);
-  }
-
-  .mkt-card h3 {
-    font-size: 1.15rem;
-    font-weight: 900;
-    margin: 0.5rem 0 0.75rem;
-    transition: color var(--transition-base);
-  }
-
-  .mkt-card p {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    line-height: 1.7;
-    transition: color var(--transition-base);
-  }
-
-  /* ─── FLYWHEEL ─── */
-  #flywheel {
-    background: var(--color-bg-dark);
-    color: white;
-    text-align: center;
-  }
-
-  #flywheel .section-label { color: var(--color-primary); }
-  #flywheel .section-title { color: white; }
-
-  .flywheel-visual {
-    margin: 3rem auto;
-    max-width: 600px;
-    position: relative;
-  }
-
-  .flywheel-ring {
-    width: 400px;
-    height: 400px;
-    margin: 0 auto;
-    position: relative;
-  }
-
-  .flywheel-ring svg {
-    animation: rotateGear 20s linear infinite;
-  }
-
-  @keyframes rotateGear {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .flywheel-center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
-
-  .flywheel-center-text {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--color-primary);
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  .flywheel-nodes {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
-  }
-
-  .flywheel-node {
-    background: #242424;
-    padding: 1.5rem;
-    border-left: 3px solid var(--color-primary);
-    text-align: left;
-    transition: background var(--transition-base);
-    cursor: default;
-  }
-
-  .flywheel-node:hover { background: #2c2c2c; }
-
-  .flywheel-node h4 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .flywheel-node p {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.6;
-  }
-
-  /* ─── CTA SECTION ─── */
-  #cta {
-    background: var(--color-bg);
-    text-align: center;
-    padding: 8rem 2rem;
-  }
-
-  .cta-inner {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  .cta-inner .section-label { text-align: center; }
-
-  .cta-mega-title {
-    font-size: clamp(3rem, 7vw, 6rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: 2rem;
-  }
-
-  .cta-mega-title span { color: var(--color-primary); }
-
-  .cta-desc {
-    font-size: 1.1rem;
-    color: var(--color-text-muted);
-    line-height: 1.7;
-    margin-bottom: 2.5rem;
-  }
-
-  .cta-url {
-    display: inline-block;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    border-bottom: 3px solid var(--color-primary);
-    padding-bottom: 0.2rem;
-    text-decoration: none;
-    font-family: 'Inter', monospace;
-    letter-spacing: 0.05em;
-    transition: all var(--transition-base);
-  }
-
-  .cta-url:hover { color: var(--color-primary-dark); letter-spacing: 0.08em; }
-
-  /* ─── FOOTER ─── */
-  footer {
-    background: var(--color-text);
-    color: rgba(255,255,255,0.6);
-    padding: 2.5rem 2rem;
-    text-align: center;
-    font-size: 0.85rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  footer .footer-brand {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: white;
-    margin-bottom: 0.5rem;
-  }
-
-  footer .footer-brand span { color: var(--color-primary); }
-
-  footer a {
-    color: var(--color-primary);
-    text-decoration: none;
-  }
-
-  /* ─── TICKER ─── */
-  .ticker-wrap {
-    background: var(--color-primary);
-    overflow: hidden;
-    padding: 0.75rem 0;
-    position: relative;
-    z-index: 1;
-  }
-
-  .ticker {
-    display: flex;
-    gap: 4rem;
-    animation: ticker 18s linear infinite;
-    white-space: nowrap;
-  }
-
-  .ticker span {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: white;
-    letter-spacing: 0.1em;
-    flex-shrink: 0;
-  }
-
-  .ticker span::before {
-    content: '▶';
-    margin-right: 1rem;
-    opacity: 0.7;
-  }
-
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 900px) {
-    .hero-content { grid-template-columns: 1fr; gap: 2rem; }
-    .hero-visual { display: none; }
-    .usp-grid { grid-template-columns: 1fr; }
-    .audience-grid { grid-template-columns: 1fr; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .steps { grid-template-columns: repeat(2, 1fr); }
-    .steps::before { display: none; }
-    .marketing-cards { grid-template-columns: 1fr; }
-    .flywheel-nodes { grid-template-columns: 1fr; }
-    .compare-table { overflow-x: auto; }
-    nav .nav-links { display: none; }
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--color-bg); }
-  ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 3px; }
-
-  /* ─── CURSOR DOT ─── */
-  .cursor-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--color-primary);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
-  }
-
-  .cursor-ring {
-    width: 32px;
-    height: 32px;
-    border: 2px solid var(--color-primary);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: transform 0.15s var(--ease-smooth), width 0.3s, height 0.3s, opacity 0.3s;
-    opacity: 0.6;
-  }
-
-  @media (hover: none) {
-    .cursor-dot, .cursor-ring { display: none; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英語勇者團 — 主選單</title>
+  <style>
+    :root {
+      --bg: #0d0d1a;
+      --card: #1e1e35;
+      --gold: #d4a843;
+      --gold-l: #f0c96a;
+      --border: #2e2e50;
+      --text: #e8dfc8;
+      --muted: #7a7a9a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background-image: radial-gradient(ellipse at 20% 30%, #1a0a3a55 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 70%, #3a0a0a55 0%, transparent 60%);
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    .hero-emoji {
+      font-size: 5rem;
+      display: block;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 40px rgba(212,168,67,.4);
+      letter-spacing: .04em;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .game-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+      box-shadow: 0 8px 30px rgba(212,168,67,.15);
+    }
+
+    .card-emoji { font-size: 2.8rem; }
+
+    .card-tag {
+      display: inline-block;
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(212,168,67,.15);
+      color: var(--gold);
+      width: fit-content;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-arrow {
+      font-size: .85rem;
+      color: var(--gold);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .coming-soon {
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .coming-soon .card-tag {
+      background: rgba(122,122,154,.15);
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 52px;
+      font-size: .78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.8;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Custom cursor -->
-<div class="cursor-dot" id="cursorDot"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-
-<!-- ─── NAVBAR ─── -->
-<nav id="navbar">
-  <div class="nav-logo">We<span class="ai">Link</span>.ai</div>
-  <ul class="nav-links">
-    <li><a href="#usp">核心技術</a></li>
-    <li><a href="#comparison">比較優勢</a></li>
-    <li><a href="#audience">目標受眾</a></li>
-    <li><a href="#how">運作流程</a></li>
-    <li><a href="#cta" class="nav-cta">立即加入</a></li>
-  </ul>
-</nav>
-
-<!-- ─── HERO ─── -->
-<section id="hero">
-  <div class="hero-content container">
-    <div class="hero-left">
-      <div class="hero-badge fade-in">GLOBAL FIRST RELEASE 全球首發</div>
-      <h1 class="hero-title fade-in fade-in-delay-1">
-        當 AI 擁有了<br><span class="highlight">大腦，</span><br>你就是他的<br>雙手與雙腳
-      </h1>
-      <p class="hero-subtitle fade-in fade-in-delay-2">WeLink.ai（維你）實體調度平台 — 連接 AI 智能與人類執行力，開創零工經濟新典範。</p>
-      <div class="hero-slogan fade-in fade-in-delay-3">AI 下單，『維』你是從！</div>
-      <div class="hero-cta-group fade-in fade-in-delay-4">
-        <button class="btn-primary" onclick="window.open('https://www.welink.ai')">立即成為執行官</button>
-        <button class="btn-secondary" onclick="document.getElementById('usp').scrollIntoView({behavior:'smooth'})">了解平台技術</button>
-      </div>
-    </div>
-    <div class="hero-visual fade-in fade-in-delay-2">
-      <div class="hero-blueprint">
-        <div class="blueprint-corner tl"></div>
-        <div class="blueprint-corner tr"></div>
-        <div class="blueprint-corner bl"></div>
-        <div class="blueprint-corner br"></div>
-        <div class="blueprint-label">SERVER RACK UNIT v.1.0 — DIGITAL-PHYSICAL LINK</div>
-        <svg class="circuit-svg" viewBox="0 0 480 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Server chassis -->
-          <rect x="20" y="20" width="240" height="260" rx="2" stroke="#1A1A1A" stroke-width="1.5" fill="rgba(234,230,216,0.3)"/>
-          <!-- Modules -->
-          <rect x="35" y="40" width="90" height="28" rx="2" stroke="#1A1A1A" stroke-width="1" fill="rgba(232,119,34,0.08)"/>
-          <rect x="35" y="76" width="90" height="28" rx="2" stroke="#1A1A1A" stroke-width="1" fill="rgba(232,119,34,0.08)"/>
-          <rect x="35" y="112" width="90" height="28" rx="2" stroke="#1A1A1A" stroke-width="1" fill="rgba(232,119,34,0.08)"/>
-          <rect x="35" y="148" width="90" height="28" rx="2" stroke="#1A1A1A" stroke-width="1" fill="rgba(232,119,34,0.08)"/>
-          <!-- Labels -->
-          <text x="80" y="58" text-anchor="middle" font-size="7" fill="#6B6B6B" font-family="monospace">MODULE A-C</text>
-          <text x="80" y="94" text-anchor="middle" font-size="7" fill="#6B6B6B" font-family="monospace">MODULE A-C</text>
-          <text x="80" y="130" text-anchor="middle" font-size="7" fill="#6B6B6B" font-family="monospace">MODULE A-C</text>
-          <text x="80" y="166" text-anchor="middle" font-size="7" fill="#6B6B6B" font-family="monospace">MODULE A-C</text>
-          <!-- Circuit paths -->
-          <path d="M155 100 L200 100 L200 60 L260 60" stroke="#E87722" stroke-width="2" fill="none" stroke-dasharray="4,3">
-            <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.5s" repeatCount="indefinite"/>
-          </path>
-          <path d="M155 130 L210 130 L210 130 L260 130" stroke="#E87722" stroke-width="2" fill="none" stroke-dasharray="4,3">
-            <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2s" repeatCount="indefinite"/>
-          </path>
-          <path d="M155 160 L210 160 L210 200 L260 200" stroke="#E87722" stroke-width="2" fill="none" stroke-dasharray="4,3">
-            <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2.5s" repeatCount="indefinite"/>
-          </path>
-          <!-- Orange connector pipe -->
-          <rect x="258" y="55" width="80" height="10" rx="5" fill="#E87722"/>
-          <rect x="258" y="125" width="80" height="10" rx="5" fill="#E87722"/>
-          <rect x="258" y="195" width="80" height="10" rx="5" fill="#E87722"/>
-          <!-- Data nodes -->
-          <circle cx="340" cy="60" r="4" fill="#E87722">
-            <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
-          </circle>
-          <circle cx="340" cy="130" r="4" fill="#E87722">
-            <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-          <circle cx="340" cy="200" r="4" fill="#E87722">
-            <animate attributeName="r" values="4;6;4" dur="1.8s" repeatCount="indefinite"/>
-          </circle>
-          <!-- Connection lines to clipboard area -->
-          <path d="M340 60 L420 60 L420 150" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="3,3" fill="none"/>
-          <!-- AI brain icon -->
-          <rect x="130" y="180" width="80" height="80" rx="4" stroke="#E87722" stroke-width="1.5" fill="rgba(232,119,34,0.05)"/>
-          <text x="170" y="228" text-anchor="middle" font-size="20" font-weight="900" fill="#E87722">AI</text>
-          <!-- Annotation texts -->
-          <text x="350" y="52" font-size="7" fill="#6B6B6B" font-family="monospace">DATA FLOW</text>
-          <text x="350" y="122" font-size="7" fill="#6B6B6B" font-family="monospace">MCP LINK</text>
-          <text x="350" y="192" font-size="7" fill="#6B6B6B" font-family="monospace">ACTUATION PATH</text>
-          <!-- Dimension lines -->
-          <line x1="20" y1="290" x2="260" y2="290" stroke="#6B6B6B" stroke-width="0.5"/>
-          <text x="140" y="300" text-anchor="middle" font-size="7" fill="#6B6B6B" font-family="monospace">3168B</text>
-        </svg>
-      </div>
-    </div>
+  <div class="hero">
+    <span class="hero-emoji">⚔️</span>
+    <h1>英語勇者團</h1>
+    <p>English Quest Adventure<br>選擇你的冒險，開口說英語！</p>
   </div>
-</section>
 
-<!-- ─── TICKER ─── -->
-<div class="ticker-wrap" aria-hidden="true">
-  <div class="ticker">
-    <span>AI 下單，維你是從</span>
-    <span>全球首創「反向外包」技術</span>
-    <span>智能合約無秒差即時發放</span>
-    <span>AI 不搶工作，AI 只會發工作給你</span>
-    <span>MCP 整合介面</span>
-    <span>多模態 AI 視覺辨識</span>
-    <span>WeLink.ai 全球首發</span>
-    <span>AI 下單，維你是從</span>
-    <span>全球首創「反向外包」技術</span>
-    <span>智能合約無秒差即時發放</span>
-    <span>AI 不搶工作，AI 只會發工作給你</span>
-    <span>MCP 整合介面</span>
-    <span>多模態 AI 視覺辨識</span>
-    <span>WeLink.ai 全球首發</span>
-  </div>
-</div>
+  <div class="card-grid">
 
-<!-- ─── USP ─── -->
-<section id="usp">
-  <div class="container">
-    <p class="section-label fade-in">獨家技術與產品獨特賣點 USP</p>
-    <h2 class="section-title fade-in fade-in-delay-1">打破 AI 與現實<br>之間的藩籬</h2>
-    <p class="section-desc fade-in fade-in-delay-2">WeLink.ai 提供世界上唯一能讓 AI 代理人直接調度人類執行實體任務的平台基礎設施。</p>
-    <div class="usp-grid">
-      <div class="usp-card fade-in fade-in-delay-1">
-        <div class="usp-icon">🔄</div>
-        <div class="usp-tag">GLOBAL FIRST</div>
-        <h3>全球首創「反向外包」技術</h3>
-        <p>打破以人類發派工作給 AI 的框架。WeLink.ai 提供全球首創的 MCP（模型上下文協議）整合介面，使 AI 代理人（AI Agent）能夠直接發送任務、簽訂智慧合約並主動下單給現實生活中的人類。</p>
+    <a class="game-card" href="DND_v1.html">
+      <span class="card-emoji">🐉</span>
+      <span class="card-tag">v1.0 — 已上線</span>
+      <div class="card-title">地下城闖關</div>
+      <div class="card-desc">
+        帶領勇者隊伍穿越洞穴、挑戰獅身人面獸、征服巨龍！<br>
+        包含場景切換、遭遇事件、職業技能發動。
       </div>
-      <div class="usp-card fade-in fade-in-delay-2">
-        <div class="usp-icon">🌐</div>
-        <div class="usp-tag">PHYSICAL LAYER</div>
-        <h3>專克數位藩籬的「物理層」</h3>
-        <p>AI 無法「觸摸草地」、無法去實體辦公室蓋章，也無法在現場拍攝實體照片。當 AI 偵測到自身遭遇物理限制時，即透過平台即時僱用本地的人類作為代理。平台確保交易安全、自動代管款項。</p>
+      <div class="card-arrow">開始遊戲 →</div>
+    </a>
+
+    <a class="game-card" href="DND_v2.html">
+      <span class="card-emoji">🗺️</span>
+      <span class="card-tag">v2.0 — 已上線</span>
+      <div class="card-title">路徑抉擇</div>
+      <div class="card-desc">
+        五道難關，三條岔路，技能只能使用一次！<br>
+        選擇最佳路線、發動角色技能、骰子決定命運。
       </div>
+      <div class="card-arrow">開始遊戲 →</div>
+    </a>
+
+    <div class="game-card coming-soon">
+      <span class="card-emoji">🏰</span>
+      <span class="card-tag">即將推出</span>
+      <div class="card-title">城堡保衛戰</div>
+      <div class="card-desc">
+        守衛王國的語言之城！用英語下達命令、指揮士兵，抵禦魔王軍的進攻。
+      </div>
+      <div class="card-arrow">敬請期待</div>
     </div>
-  </div>
-</section>
 
-<!-- ─── COMPARISON ─── -->
-<section id="comparison">
-  <div class="container">
-    <p class="section-label fade-in">零工經濟的典範轉移</p>
-    <h2 class="section-title fade-in fade-in-delay-1">從「人指使人」<br>到「AI 僱用人」</h2>
-    <div class="compare-table fade-in fade-in-delay-2">
-      <div class="compare-header">
-        <div>比較維度</div>
-        <div>傳統零工經濟（如 Uber, TaskRabbit）</div>
-        <div>WeLink.ai 反向外包（Reverse Outsourcing）</div>
+    <div class="game-card coming-soon">
+      <span class="card-emoji">🌊</span>
+      <span class="card-tag">即將推出</span>
+      <div class="card-title">深海迷航</div>
+      <div class="card-desc">
+        潛入英語的深海世界！與神秘海洋生物對話，解開古老語言謎題。
       </div>
-      <div class="compare-row">
-        <div>👤 任務發起者</div>
-        <div>人類消費者</div>
-        <div>AI 代理人（AI Agent）</div>
-      </div>
-      <div class="compare-row">
-        <div>🔧 任務性質</div>
-        <div>駕駛、外送、數位勞動</div>
-        <div>無限制的「物理層」實體執行</div>
-      </div>
-      <div class="compare-row">
-        <div>✅ 驗收機制</div>
-        <div>人工信任與客訴機制</div>
-        <div>多模態 AI 視覺辨識 &amp; 智慧合約</div>
-      </div>
-      <div class="compare-row">
-        <div>⏱ 撥款速度</div>
-        <div>週結或月結</div>
-        <div>智能合約無秒差即時發放</div>
-      </div>
+      <div class="card-arrow">敬請期待</div>
     </div>
-  </div>
-</section>
 
-<!-- ─── STATS ─── -->
-<section id="stats">
-  <div class="container">
-    <div class="stats-grid">
-      <div class="stat-item fade-in">
-        <div class="stat-number" data-target="100">0</div>
-        <div class="stat-label">全球首發<br>零競品</div>
+    <div class="game-card coming-soon">
+      <span class="card-emoji">🚀</span>
+      <span class="card-tag">即將推出</span>
+      <div class="card-title">太空冒險</div>
+      <div class="card-desc">
+        登上星際飛船，探索未知星球！用英語與外星文明交涉，化解宇宙危機。
       </div>
-      <div class="stat-item fade-in fade-in-delay-1">
-        <div class="stat-number" data-target="30">0<span>s</span></div>
-        <div class="stat-label">首單<br>免費體驗任務</div>
-      </div>
-      <div class="stat-item fade-in fade-in-delay-2">
-        <div class="stat-number">$<span data-count="30">0</span></div>
-        <div class="stat-label">首單<br>美元免費串接</div>
-      </div>
-      <div class="stat-item fade-in fade-in-delay-3">
-        <div class="stat-number" data-count="0">0<span>s</span></div>
-        <div class="stat-label">無秒差<br>即時撥款</div>
-      </div>
+      <div class="card-arrow">敬請期待</div>
     </div>
+
   </div>
-</section>
 
-<!-- ─── AUDIENCE ─── -->
-<section id="audience">
-  <div class="container">
-    <div class="audience-grid">
-      <div class="audience-radar fade-in">
-        <div style="position:relative; width:300px; height:300px;">
-          <svg viewBox="0 0 300 300" width="300" height="300">
-            <!-- Grid rings -->
-            <polygon points="150,30 270,113 230,247 70,247 30,113" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
-            <polygon points="150,62 240,129 210,223 90,223 60,129" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
-            <polygon points="150,94 210,145 190,199 110,199 90,145" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
-            <!-- Data polygon -->
-            <polygon points="150,45 255,120 215,240 85,240 45,120" fill="rgba(232,119,34,0.3)" stroke="#E87722" stroke-width="2" id="radarPoly"/>
-            <!-- Axis lines -->
-            <line x1="150" y1="150" x2="150" y2="30" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-            <line x1="150" y1="150" x2="270" y2="113" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-            <line x1="150" y1="150" x2="230" y2="247" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-            <line x1="150" y1="150" x2="70" y2="247" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-            <line x1="150" y1="150" x2="30" y2="113" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-            <!-- Data points -->
-            <circle cx="150" cy="45" r="5" fill="#E87722"/>
-            <circle cx="255" cy="120" r="5" fill="#E87722"/>
-            <circle cx="215" cy="240" r="5" fill="#E87722"/>
-            <circle cx="85" cy="240" r="5" fill="#E87722"/>
-            <circle cx="45" cy="120" r="5" fill="#E87722"/>
-          </svg>
-          <div style="position:absolute;top:-5px;left:50%;transform:translateX(-50%);font-size:0.8rem;font-weight:700;">渴望自由</div>
-          <div style="position:absolute;bottom:-5px;left:-10px;font-size:0.8rem;font-weight:700;">行動導向</div>
-          <div style="position:absolute;bottom:-5px;right:-10px;font-size:0.8rem;font-weight:700;">科技適應力</div>
-        </div>
-      </div>
-      <div class="audience-info fade-in fade-in-delay-1">
-        <p class="section-label">核心受眾分析：鎖定「維」世代</p>
-        <h3>誰會接下 AI 派發的訂單？</h3>
-        <p>鎖定台灣 20–35 歲，渴望時間自由、具備高度科技適應力的自由工作者、斜槓青年與數位遊牧客。我們稱之為「維」世代（代表追求生活維度豐富多變的一代）。</p>
-        <div class="insight-box">
-          <p>他們不當傳統公司的社畜，而是樂於接受高效率、指令清晰、自動結帳的 AI 任務，將自己閒置的實體時間和精力「API 接口化」，完美體現「WeLink.ai」連接人類與科技的核心精神。</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  <footer>
+    英語勇者團 © 2026 &nbsp;·&nbsp; 讓開口說英語變得有趣
+  </footer>
 
-<!-- ─── HOW IT WORKS ─── -->
-<section id="how">
-  <div class="container">
-    <p class="section-label fade-in">30 秒電視廣告腳本 TVC</p>
-    <h2 class="section-title fade-in fade-in-delay-1">賽博龐克交織的<br>衝突美學</h2>
-    <div class="steps">
-      <div class="step fade-in fade-in-delay-1">
-        <div class="step-number">0-7s</div>
-        <div class="step-time">科幻電子啟動音效</div>
-        <h4>AI 偵測需求</h4>
-        <p>幽暗科技數據線條，AI 偵測到轄下合約需要蓋章，立即派單。</p>
-      </div>
-      <div class="step fade-in fade-in-delay-2">
-        <div class="step-number">7-15s</div>
-        <div class="step-time">輕快的警示聲</div>
-        <h4>維世代出動</h4>
-        <p>鏡頭切換到街頭騎著踏車的斜槓阿維，手機接到推播：「新任務：到信義區大樓驗收伺服器。」</p>
-      </div>
-      <div class="step fade-in fade-in-delay-3">
-        <div class="step-number">15-23s</div>
-        <div class="step-time">收銀機叮咚聲</div>
-        <h4>AI 視覺驗證</h4>
-        <p>阿維抵達現場拍照上傳，AI 視覺模型驗證完成，款項無秒差入帳。</p>
-      </div>
-      <div class="step fade-in fade-in-delay-4">
-        <div class="step-number">23-30s</div>
-        <div class="step-time">強烈科技感重低音</div>
-        <h4>WeLink 全球首發</h4>
-        <p>「AI 下單，『維』你是從！WeLink，全球首發上線！」</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── MARKETING ─── -->
-<section id="marketing">
-  <div class="container">
-    <p class="section-label fade-in">告知式宣傳與行銷推廣策略</p>
-    <h2 class="section-title fade-in fade-in-delay-1">三階段引爆<br>市場聲量</h2>
-    <div class="marketing-cards">
-      <div class="mkt-card fade-in fade-in-delay-1">
-        <div class="mkt-num">01</div>
-        <h3>極速感知（告知式轟炸）</h3>
-        <p>在大眾尚未熟悉概念前，高頻率投放 30 秒洗腦短片。在電視與捷運大樓平面廣告不斷重複「AI 下單，我跑腿」的概念，將抽象科技轉為具體常識。</p>
-      </div>
-      <div class="mkt-card fade-in fade-in-delay-2">
-        <div class="mkt-num">02</div>
-        <h3>翻轉觀點（去威脅論）</h3>
-        <p>當社會都在討論 AI 會不會取代人類，我們的行銷主打「AI 不搶工作，AI 只會發工作給你！」，迅速激發各類斜槓社群討論，創造網路討論度與正面效益。</p>
-      </div>
-      <div class="mkt-card fade-in fade-in-delay-3">
-        <div class="mkt-num">03</div>
-        <h3>首單免費（B端裂變）</h3>
-        <p>對 AI 新創公司與軟體開發者提供 API 免費串接，及首單 30 美元免費實體任務，迅速帶動百萬級 AI 代理人接入，創造持續性的實體用人需求。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── FLYWHEEL ─── -->
-<section id="flywheel">
-  <div class="container">
-    <p class="section-label fade-in">成長飛輪與商業展望</p>
-    <h2 class="section-title fade-in fade-in-delay-1">聯手開創人類與<br>AI 的新「維」度！</h2>
-    <div class="flywheel-visual fade-in fade-in-delay-1">
-      <div class="flywheel-ring">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          <!-- Outer ring -->
-          <circle cx="200" cy="200" r="180" fill="none" stroke="#333" stroke-width="2"/>
-          <circle cx="200" cy="200" r="160" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-          <!-- Gear teeth (outer) -->
-          <g id="teeth">
-            <rect x="196" y="16" width="8" height="20" rx="2" fill="#E87722"/>
-            <rect x="196" y="364" width="8" height="20" rx="2" fill="#E87722"/>
-            <rect x="16" y="196" width="20" height="8" rx="2" fill="#E87722"/>
-            <rect x="364" y="196" width="20" height="8" rx="2" fill="#E87722"/>
-            <rect x="319" y="67" width="20" height="8" rx="2" fill="#E87722" transform="rotate(45 329 71)"/>
-            <rect x="319" y="325" width="20" height="8" rx="2" fill="#E87722" transform="rotate(-45 329 329)"/>
-            <rect x="61" y="67" width="20" height="8" rx="2" fill="#E87722" transform="rotate(-45 71 71)"/>
-            <rect x="61" y="325" width="20" height="8" rx="2" fill="#E87722" transform="rotate(45 71 329)"/>
-          </g>
-          <!-- Spokes -->
-          <line x1="200" y1="40" x2="200" y2="160" stroke="#E87722" stroke-width="1.5" stroke-dasharray="4,4"/>
-          <line x1="200" y1="240" x2="200" y2="360" stroke="#E87722" stroke-width="1.5" stroke-dasharray="4,4"/>
-          <line x1="40" y1="200" x2="160" y2="200" stroke="#E87722" stroke-width="1.5" stroke-dasharray="4,4"/>
-          <line x1="240" y1="200" x2="360" y2="200" stroke="#E87722" stroke-width="1.5" stroke-dasharray="4,4"/>
-          <!-- Center hub -->
-          <circle cx="200" cy="200" r="60" fill="#1A1A1A" stroke="#E87722" stroke-width="2"/>
-          <circle cx="200" cy="200" r="45" fill="#242424" stroke="#333" stroke-width="1"/>
-          <text x="200" y="195" text-anchor="middle" font-size="12" font-weight="900" fill="#E87722" font-family="'Noto Sans TC', sans-serif">飛輪效應</text>
-          <text x="200" y="213" text-anchor="middle" font-size="12" font-weight="900" fill="#E87722" font-family="'Noto Sans TC', sans-serif">擴張</text>
-          <!-- Direction arrows on ring -->
-          <path d="M 320 120 A 140 140 0 0 1 350 200" stroke="#E87722" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-          <defs>
-            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#E87722"/>
-            </marker>
-          </defs>
-        </svg>
-      </div>
-    </div>
-    <div class="flywheel-nodes">
-      <div class="flywheel-node fade-in fade-in-delay-1">
-        <h4>🚀 行銷引爆 B2C 認知</h4>
-        <p>透過名人代言、TVC 廣告、KOL 社群行銷，引爆「維世代」大眾認知。</p>
-      </div>
-      <div class="flywheel-node fade-in fade-in-delay-2">
-        <h4>🌍 平台具備海量實體執行力</h4>
-        <p>越多「維」世代執行官加入，平台對 AI 代理人的吸引力就越強。</p>
-      </div>
-      <div class="flywheel-node fade-in fade-in-delay-3">
-        <h4>🔌 B2B 開發者無痛串接 API</h4>
-        <p>對 AI 新創公司提供首單免費方案，快速建立 AI 代理人生態系。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── CTA ─── -->
-<section id="cta">
-  <div class="cta-inner">
-    <p class="section-label fade-in">立即行動</p>
-    <h2 class="cta-mega-title fade-in fade-in-delay-1">
-      AI 不搶工作<br><span>AI 只會發工作給你</span>
-    </h2>
-    <p class="cta-desc fade-in fade-in-delay-2">成為全球首批「AI 的雙手與雙腳」，接收來自 AI 代理人的真實任務，智能合約即時撥款，無須等待。</p>
-    <div class="hero-cta-group fade-in fade-in-delay-3" style="justify-content:center;">
-      <button class="btn-primary" onclick="window.open('https://www.welink.ai')">立即成為執行官 →</button>
-      <button class="btn-secondary">首單 $30 免費串接</button>
-    </div>
-    <p style="margin-top:2.5rem;" class="fade-in fade-in-delay-4">
-      <a href="https://www.welink.ai" class="cta-url" target="_blank">www.welink.ai</a>
-    </p>
-  </div>
-</section>
-
-<!-- ─── FOOTER ─── -->
-<footer>
-  <div class="footer-brand">We<span>Link</span>.ai</div>
-  <p>WeLink.ai 全球首發行銷合作計畫 ｜ 官方網站：<a href="https://www.welink.ai" target="_blank">www.welink.ai</a></p>
-  <p style="margin-top:0.5rem;">提案單位：維你科技廣告代理團隊 ｜ © 2026 WeLink.ai All Rights Reserved</p>
-</footer>
-
-<script>
-  // ─── Cursor ───
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRing');
-  let ringX = 0, ringY = 0, dotX = 0, dotY = 0;
-
-  document.addEventListener('mousemove', e => {
-    dotX = e.clientX; dotY = e.clientY;
-    dot.style.left = dotX + 'px';
-    dot.style.top = dotY + 'px';
-  });
-
-  function animateRing() {
-    ringX += (dotX - ringX) * 0.12;
-    ringY += (dotY - ringY) * 0.12;
-    ring.style.left = ringX + 'px';
-    ring.style.top = ringY + 'px';
-    requestAnimationFrame(animateRing);
-  }
-  animateRing();
-
-  document.querySelectorAll('a, button, .usp-card, .mkt-card, .step').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      ring.style.width = '50px'; ring.style.height = '50px'; ring.style.opacity = '0.9';
-    });
-    el.addEventListener('mouseleave', () => {
-      ring.style.width = '32px'; ring.style.height = '32px'; ring.style.opacity = '0.6';
-    });
-  });
-
-  // ─── Navbar scroll ───
-  const navbar = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
-  });
-
-  // ─── Fade in on scroll ───
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.12 });
-
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-  // ─── Number counter ───
-  function animateCount(el, target, suffix = '') {
-    let start = 0;
-    const duration = 2000;
-    const step = (timestamp) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(ease * target) + suffix;
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }
-
-  const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const nums = entry.target.querySelectorAll('[data-target]');
-        nums.forEach(num => {
-          const target = parseInt(num.dataset.target);
-          animateCount(num, target, '%');
-        });
-        statsObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.3 });
-
-  document.querySelectorAll('#stats').forEach(el => statsObserver.observe(el));
-
-  // ─── Radar pulse animation ───
-  const radarPoly = document.getElementById('radarPoly');
-  if (radarPoly) {
-    let scale = 1;
-    let growing = true;
-    setInterval(() => {
-      if (growing) { scale += 0.002; if (scale >= 1.03) growing = false; }
-      else { scale -= 0.002; if (scale <= 0.97) growing = true; }
-      radarPoly.style.transform = `scale(${scale})`;
-      radarPoly.style.transformOrigin = '150px 150px';
-    }, 30);
-  }
-
-  // ─── Hero title reveal ───
-  window.addEventListener('load', () => {
-    document.querySelectorAll('#hero .fade-in').forEach((el, i) => {
-      setTimeout(() => el.classList.add('visible'), 200 + i * 150);
-    });
-  });
-</script>
 </body>
 </html>
