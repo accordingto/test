@@ -360,15 +360,17 @@
   #usp .section-desc { color: rgba(255,255,255,0.6); }
 
   .usp-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     margin-top: 3rem;
   }
 
   .usp-card {
     background: #242424;
-    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
     position: relative;
     overflow: hidden;
     transition: background var(--transition-base);
@@ -414,6 +416,16 @@
     line-height: 1.75;
     color: rgba(255,255,255,0.65);
   }
+
+  .usp-card-content {
+    padding: 3rem 2.8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .usp-card.reverse .usp-card-img-wrap { order: 2; }
+  .usp-card.reverse .usp-card-content { order: 1; }
 
   .usp-icon {
     width: 48px;
@@ -847,9 +859,8 @@
 
   /* ─── USP CARD IMAGE ─── */
   .usp-card-img-wrap {
-    margin: -2.5rem -2.5rem 1.5rem;
-    height: 200px;
     overflow: hidden;
+    position: relative;
   }
 
   .usp-card-img {
@@ -1053,7 +1064,11 @@
     body { overflow-x: hidden; }
     .hero-content { grid-template-columns: 1fr; gap: 2rem; }
     .hero-visual { display: none; }
-    .usp-grid { grid-template-columns: 1fr; }
+    .usp-card { grid-template-columns: 1fr; min-height: auto; }
+    .usp-card-img-wrap { height: 240px; }
+    .usp-card.reverse .usp-card-img-wrap { order: 0; }
+    .usp-card.reverse .usp-card-content { order: 1; }
+    .usp-card-content { padding: 2rem 2rem; }
     .audience-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .steps { grid-template-columns: repeat(2, 1fr); }
@@ -1082,7 +1097,7 @@
 
     .section-title { font-size: 1.75rem; }
 
-    .usp-card { padding: 1.8rem 1.4rem; }
+    .usp-card-content { padding: 1.8rem 1.4rem; }
     .usp-icon { width: 40px; height: 40px; font-size: 1.1rem; }
 
     .steps { grid-template-columns: 1fr; }
@@ -1220,28 +1235,32 @@
       <div class="usp-card fade-in fade-in-delay-1">
         <div class="usp-card-img-wrap">
           <img
-            src="https://images.pexels.com/photos/8294608/pexels-photo-8294608.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&dpr=1"
+            src="https://images.pexels.com/photos/17485706/pexels-photo-17485706.jpeg?auto=compress&cs=tinysrgb&w=900&h=800&dpr=1"
             alt="AI 代理人自動派單給實體執行官"
             class="usp-card-img"
           >
         </div>
-        <div class="usp-icon">🔄</div>
-        <div class="usp-tag">GLOBAL FIRST</div>
-        <h3>全球首創「反向外包」技術</h3>
-        <p>打破以人類發派工作給 AI 的框架。WeLink.ai 提供全球首創的 MCP（模型上下文協議）整合介面，使 AI 代理人（AI Agent）能夠直接發送任務、簽訂智慧合約並主動下單給現實生活中的人類。</p>
+        <div class="usp-card-content">
+          <div class="usp-icon">🔄</div>
+          <div class="usp-tag">GLOBAL FIRST</div>
+          <h3>全球首創「反向外包」技術</h3>
+          <p>打破以人類發派工作給 AI 的框架。WeLink.ai 提供全球首創的 MCP（模型上下文協議）整合介面，使 AI 代理人（AI Agent）能夠直接發送任務、簽訂智慧合約並主動下單給現實生活中的人類。</p>
+        </div>
       </div>
-      <div class="usp-card fade-in fade-in-delay-2">
+      <div class="usp-card reverse fade-in fade-in-delay-2">
         <div class="usp-card-img-wrap">
           <img
-            src="https://images.pexels.com/photos/4393247/pexels-photo-4393247.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&dpr=1"
+            src="https://images.pexels.com/photos/5213546/pexels-photo-5213546.jpeg?auto=compress&cs=tinysrgb&w=900&h=800&dpr=1"
             alt="人類執行官接收 AI 派發的實體任務"
             class="usp-card-img"
           >
         </div>
-        <div class="usp-icon">🌐</div>
-        <div class="usp-tag">PHYSICAL LAYER</div>
-        <h3>專克數位藩籬的「物理層」</h3>
-        <p>AI 無法「觸摸草地」、無法去實體辦公室蓋章，也無法在現場拍攝實體照片。當 AI 偵測到自身遭遇物理限制時，即透過平台即時僱用本地的人類作為代理。平台確保交易安全、自動代管款項。</p>
+        <div class="usp-card-content">
+          <div class="usp-icon">🌐</div>
+          <div class="usp-tag">PHYSICAL LAYER</div>
+          <h3>專克數位藩籬的「物理層」</h3>
+          <p>AI 無法「觸摸草地」、無法去實體辦公室蓋章，也無法在現場拍攝實體照片。當 AI 偵測到自身遭遇物理限制時，即透過平台即時僱用本地的人類作為代理。平台確保交易安全、自動代管款項。</p>
+        </div>
       </div>
     </div>
   </div>
