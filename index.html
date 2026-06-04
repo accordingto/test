@@ -360,15 +360,17 @@
   #usp .section-desc { color: rgba(255,255,255,0.6); }
 
   .usp-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     margin-top: 3rem;
   }
 
   .usp-card {
     background: #242424;
-    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
     position: relative;
     overflow: hidden;
     transition: background var(--transition-base);
@@ -414,6 +416,16 @@
     line-height: 1.75;
     color: rgba(255,255,255,0.65);
   }
+
+  .usp-card-content {
+    padding: 3rem 2.8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .usp-card.reverse .usp-card-img-wrap { order: 2; }
+  .usp-card.reverse .usp-card-content { order: 1; }
 
   .usp-icon {
     width: 48px;
@@ -845,9 +857,105 @@
     line-height: 1.6;
   }
 
+  /* ─── USP CARD IMAGE ─── */
+  .usp-card-img-wrap {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .usp-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.72;
+    filter: brightness(0.88) saturate(0.9);
+    transition: transform 0.6s var(--ease-smooth), opacity 0.4s var(--ease-smooth);
+  }
+
+  .usp-card:hover .usp-card-img {
+    transform: scale(1.05);
+    opacity: 1;
+    filter: brightness(1) saturate(1.1);
+  }
+
+  /* ─── SHOWCASE ─── */
+  #showcase {
+    background: var(--color-cream);
+  }
+
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .showcase-item {
+    position: relative;
+    cursor: default;
+  }
+
+  .showcase-img-wrap {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    border: 2px solid var(--color-text);
+  }
+
+  .showcase-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s var(--ease-smooth);
+  }
+
+  .showcase-item:hover .showcase-img {
+    transform: scale(1.06);
+  }
+
+  .showcase-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(transparent, rgba(26,26,26,0.86));
+    pointer-events: none;
+  }
+
+  .showcase-tag {
+    font-size: 0.63rem;
+    letter-spacing: 0.14em;
+    color: var(--color-primary);
+    display: block;
+    margin-bottom: 0.4rem;
+    font-family: 'Inter', monospace;
+    font-weight: 700;
+  }
+
+  .showcase-overlay h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+
+  .showcase-desc {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+    margin-top: 1rem;
+    border-left: 3px solid var(--color-primary);
+    padding-left: 0.8rem;
+  }
+
   /* ─── CTA SECTION ─── */
   #cta {
-    background: var(--color-bg);
+    background:
+      linear-gradient(rgba(234,230,216,0.90), rgba(234,230,216,0.90)),
+      url('https://images.pexels.com/photos/17576844/pexels-photo-17576844.jpeg?auto=compress&cs=tinysrgb&w=1920&q=80') center/cover no-repeat;
     text-align: center;
     padding: 8rem 2rem;
   }
@@ -953,17 +1061,62 @@
 
   /* ─── RESPONSIVE ─── */
   @media (max-width: 900px) {
+    body { overflow-x: hidden; }
     .hero-content { grid-template-columns: 1fr; gap: 2rem; }
     .hero-visual { display: none; }
-    .usp-grid { grid-template-columns: 1fr; }
+    .usp-card { grid-template-columns: 1fr; min-height: auto; }
+    .usp-card-img-wrap { height: 240px; }
+    .usp-card.reverse .usp-card-img-wrap { order: 0; }
+    .usp-card.reverse .usp-card-content { order: 1; }
+    .usp-card-content { padding: 2rem 2rem; }
     .audience-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .steps { grid-template-columns: repeat(2, 1fr); }
     .steps::before { display: none; }
     .marketing-cards { grid-template-columns: 1fr; }
+    .showcase-grid { grid-template-columns: 1fr; }
     .flywheel-nodes { grid-template-columns: 1fr; }
+    .flywheel-ring { width: 100%; max-width: 380px; height: auto; }
+    .flywheel-ring svg { width: 100%; height: auto; display: block; }
     .compare-table { overflow-x: auto; }
     nav .nav-links { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    section { padding: 3.5rem 1.2rem; }
+    #hero { padding: 5.5rem 1.2rem 2.5rem; }
+    #cta { padding: 5rem 1.2rem; }
+
+    .hero-badge { font-size: 0.66rem; padding: 0.3rem 0.7rem; }
+    .hero-title { font-size: 2.2rem; }
+    .hero-slogan { font-size: 1.1rem; padding: 0.5rem 1rem; }
+    .hero-cta-group { flex-direction: column; }
+    .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+
+    nav { padding: 0.9rem 1.2rem; }
+
+    .section-title { font-size: 1.75rem; }
+
+    .usp-card-content { padding: 1.8rem 1.4rem; }
+    .usp-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+
+    .steps { grid-template-columns: 1fr; }
+    .step-number { width: 60px; height: 60px; font-size: 1.1rem; }
+
+    .stats-grid { gap: 1rem; }
+    .stat-number { font-size: 2.2rem; }
+
+    .audience-photo-wrap { max-width: 100%; }
+
+    .compare-header div,
+    .compare-row div { padding: 0.75rem 0.8rem; font-size: 0.78rem; }
+
+    .mkt-card { padding: 1.5rem; }
+
+    .flywheel-ring { max-width: 280px; }
+
+    .cta-mega-title { font-size: 2.3rem; }
+    .cta-inner .hero-cta-group { flex-direction: column; }
   }
 
   /* Scrollbar */
@@ -1080,16 +1233,34 @@
     <p class="section-desc fade-in fade-in-delay-2">WeLink.ai 提供世界上唯一能讓 AI 代理人直接調度人類執行實體任務的平台基礎設施。</p>
     <div class="usp-grid">
       <div class="usp-card fade-in fade-in-delay-1">
-        <div class="usp-icon">🔄</div>
-        <div class="usp-tag">GLOBAL FIRST</div>
-        <h3>全球首創「反向外包」技術</h3>
-        <p>打破以人類發派工作給 AI 的框架。WeLink.ai 提供全球首創的 MCP（模型上下文協議）整合介面，使 AI 代理人（AI Agent）能夠直接發送任務、簽訂智慧合約並主動下單給現實生活中的人類。</p>
+        <div class="usp-card-img-wrap">
+          <img
+            src="https://images.pexels.com/photos/17485706/pexels-photo-17485706.jpeg?auto=compress&cs=tinysrgb&w=900&h=800&dpr=1"
+            alt="AI 代理人自動派單給實體執行官"
+            class="usp-card-img"
+          >
+        </div>
+        <div class="usp-card-content">
+          <div class="usp-icon">🔄</div>
+          <div class="usp-tag">GLOBAL FIRST</div>
+          <h3>全球首創「反向外包」技術</h3>
+          <p>打破以人類發派工作給 AI 的框架。WeLink.ai 提供全球首創的 MCP（模型上下文協議）整合介面，使 AI 代理人（AI Agent）能夠直接發送任務、簽訂智慧合約並主動下單給現實生活中的人類。</p>
+        </div>
       </div>
-      <div class="usp-card fade-in fade-in-delay-2">
-        <div class="usp-icon">🌐</div>
-        <div class="usp-tag">PHYSICAL LAYER</div>
-        <h3>專克數位藩籬的「物理層」</h3>
-        <p>AI 無法「觸摸草地」、無法去實體辦公室蓋章，也無法在現場拍攝實體照片。當 AI 偵測到自身遭遇物理限制時，即透過平台即時僱用本地的人類作為代理。平台確保交易安全、自動代管款項。</p>
+      <div class="usp-card reverse fade-in fade-in-delay-2">
+        <div class="usp-card-img-wrap">
+          <img
+            src="https://images.pexels.com/photos/5213546/pexels-photo-5213546.jpeg?auto=compress&cs=tinysrgb&w=900&h=800&dpr=1"
+            alt="人類執行官接收 AI 派發的實體任務"
+            class="usp-card-img"
+          >
+        </div>
+        <div class="usp-card-content">
+          <div class="usp-icon">🌐</div>
+          <div class="usp-tag">PHYSICAL LAYER</div>
+          <h3>專克數位藩籬的「物理層」</h3>
+          <p>AI 無法「觸摸草地」、無法去實體辦公室蓋章，也無法在現場拍攝實體照片。當 AI 偵測到自身遭遇物理限制時，即透過平台即時僱用本地的人類作為代理。平台確保交易安全、自動代管款項。</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1130,6 +1301,62 @@
   </div>
 </section>
 
+<!-- ─── SHOWCASE ─── -->
+<section id="showcase">
+  <div class="container">
+    <p class="section-label fade-in">真實應用場景</p>
+    <h2 class="section-title fade-in fade-in-delay-1">AI 下單的<br>三大場景</h2>
+    <div class="showcase-grid">
+
+      <div class="showcase-item fade-in fade-in-delay-1">
+        <div class="showcase-img-wrap">
+          <img
+            src="https://images.pexels.com/photos/19857928/pexels-photo-19857928.jpeg?auto=compress&cs=tinysrgb&w=800&h=560&dpr=1"
+            alt="台北城市場域 — AI 調度核心"
+            class="showcase-img"
+          >
+          <div class="showcase-overlay">
+            <span class="showcase-tag">SCENARIO 01</span>
+            <h4>城市場域即時調度</h4>
+          </div>
+        </div>
+        <p class="showcase-desc">AI 偵測到轄下合約需要實體執行，即時比對城市內最近的執行官，秒速完成派單。</p>
+      </div>
+
+      <div class="showcase-item fade-in fade-in-delay-2">
+        <div class="showcase-img-wrap">
+          <img
+            src="https://images.pexels.com/photos/8566563/pexels-photo-8566563.jpeg?auto=compress&cs=tinysrgb&w=800&h=560&dpr=1"
+            alt="AI 指揮實體任務執行"
+            class="showcase-img"
+          >
+          <div class="showcase-overlay">
+            <span class="showcase-tag">SCENARIO 02</span>
+            <h4>實體任務自動履約</h4>
+          </div>
+        </div>
+        <p class="showcase-desc">從蓋章驗收、現場拍攝到資料蒐集，任何 AI 無法親自完成的物理限制，一律由執行官代勞。</p>
+      </div>
+
+      <div class="showcase-item fade-in fade-in-delay-3">
+        <div class="showcase-img-wrap">
+          <img
+            src="https://images.pexels.com/photos/8199233/pexels-photo-8199233.jpeg?auto=compress&cs=tinysrgb&w=800&h=560&dpr=1"
+            alt="維世代執行官手機接單即時到帳"
+            class="showcase-img"
+          >
+          <div class="showcase-overlay">
+            <span class="showcase-tag">SCENARIO 03</span>
+            <h4>驗收即秒速到帳</h4>
+          </div>
+        </div>
+        <p class="showcase-desc">執行官上傳完成照片，AI 視覺模型即時驗收，智能合約自動觸發，款項無秒差入帳。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- ─── STATS ─── -->
 <section id="stats">
   <div class="container">
@@ -1161,8 +1388,8 @@
       <div class="audience-radar fade-in">
         <div class="audience-photo-wrap">
           <img
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_3E0cx7tJCvGjmJ3yz7U2djF5vVv/hf_20260603_141415_0c146689-f80a-4403-aa02-21cd4da60456.png"
-            alt="維世代執行官 — 接收 AI 派發任務"
+            src="https://images.pexels.com/photos/4350178/pexels-photo-4350178.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=1"
+            alt="維世代執行官 — 自由、科技、行動"
             class="audience-photo"
           />
           <div class="audience-photo-caption">「維」世代執行官 ── <span>渴望自由 · 行動導向 · 科技適應</span></div>
