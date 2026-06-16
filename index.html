@@ -269,9 +269,18 @@
       error: { text: "發生錯誤", step: null },
     };
 
+    function isServerRunning() {
+      return location.protocol === "http:" || location.protocol === "https:";
+    }
+
     async function submitJob() {
       const url = document.getElementById("url-input").value.trim();
       if (!url) { alert("請輸入 YouTube 連結"); return; }
+
+      if (!isServerRunning()) {
+        alert("請先執行 Flask 伺服器：\n\npython app.py\n\n然後在瀏覽器開啟 http://localhost:5000");
+        return;
+      }
 
       document.getElementById("submit-btn").disabled = true;
       document.getElementById("status-box").style.display = "block";
@@ -294,7 +303,11 @@
         currentJobId = data.job_id;
         pollStatus();
       } catch (e) {
-        showError(e.message);
+        if (e instanceof TypeError || e.message.includes("pattern") || e.message.includes("fetch") || e.message.includes("Failed")) {
+          showError("無法連線到伺服器。請確認已執行 python app.py，並透過 http://localhost:5000 開啟此頁面。");
+        } else {
+          showError(e.message);
+        }
       }
     }
 
